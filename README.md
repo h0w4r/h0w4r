@@ -49,9 +49,6 @@ Estudio **Ingeniería de Sistemas**, pero también tengo gran fascinación por o
   <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=h0w4r&layout=compact&theme=tokyonight&include_all_commits=true&count_private=true&hide_rank=false&hide_border=true" alt="Top Langs"/>
 </p>
 
-\n![Trophies](https://github-profile-trophy.vercel.app/?username=h0w4r&theme=onestar&no-frame=true)\n
-
-\n![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)\n![Spring](https://img.shields.io/badge/Spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white)\n... etc.\n
 ---
 
 ## 🔄 Última actividad
