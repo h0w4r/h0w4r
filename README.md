@@ -12,7 +12,7 @@
 
 ## Sobre mí
 
-¡Hola! Soy **Christian** (Chris) — Desarrollador de software con JAVA, RPG y C/C++.
+¡Hola! Soy **Chris** — Desarrollador de software con JAVA, RPG y C/C++.
 
 Estudio **Ingeniería de Sistemas**, pero también tengo gran fascinación por otros temas como la **física teórica, los fenómenos anómalos y el arte**.
 
@@ -28,15 +28,20 @@ Estudio **Ingeniería de Sistemas**, pero también tengo gran fascinación por o
 
 ## 🛠️ Tech Stack
 
+![C](https://img.shields.io/badge/C-00599C?style=for-the-badge&logo=c&logoColor=white)
+![C++](https://img.shields.io/badge/C++-00599C?style=for-the-badge&logo=cplusplus&logoColor=white)
 ![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring](https://img.shields.io/badge/Spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
 ![RPGLE](https://img.shields.io/badge/RPGLE-009688?style=for-the-badge)
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![C](https://img.shields.io/badge/C-00599C?style=for-the-badge&logo=c&logoColor=white)
 ![SQL](https://img.shields.io/badge/SQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
-![Spring](https://img.shields.io/badge/Spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
+![DB2](https://img.shields.io/badge/DB2-006699?style=for-the-badge&logo=ibm&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
 ![OpenShift](https://img.shields.io/badge/OpenShift-E00?style=for-the-badge&logo=redhatopenshift&logoColor=white)
 ![Elastic Stack](https://img.shields.io/badge/Elastic-005571?style=for-the-badge&logo=elasticstack&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
+![Machine Learning](https://img.shields.io/badge/ML-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)
+![REST](https://img.shields.io/badge/REST-25A162?style=for-the-badge&logoColor=white)
 
 ---
 
@@ -67,5 +72,5 @@ Estudio **Ingeniería de Sistemas**, pero también tengo gran fascinación por o
 ---
 
 > *“La tecnología es el medio; la curiosidad, el combustible.”* — anónimo.
-> <br>![Visitas](https://profile-counter.glitch.me/h0w4r/count.svg)<br>
+<br>![Visitas](https://profile-counter.glitch.me/h0w4r/count.svg)<br>
 
