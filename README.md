@@ -21,7 +21,7 @@ Estudio **Ingeniería de Sistemas**, pero también tengo gran fascinación por o
 - 🌱 **Aprendiendo:** C/C++ avanzado · Bash scripting · Software de medios de pago  
 - 👯 **Colaboro en:** Proyecto de predicción de criticidad de vulnerabilidades con Machine Learning (Aprendizaje supervisado)  
 - 💬 **Pregúntame sobre:** IBM i / RPGLE · DB2 · Software bancario · ML pipelines · Java  
-- 📫 **Contacto:** [LinkedIn](https://www.linkedin.com/in/h0w4r) · h0w4r[at]example.com  
+- 📫 **Contacto:** [LinkedIn](https://www.linkedin.com/in/cehp94/) · cehprad@gmail.com
 - ⚡ **Dato curioso:** Juego Brawlhalla y me gusta ver series policiales  
 
 ---
@@ -33,7 +33,6 @@ Estudio **Ingeniería de Sistemas**, pero también tengo gran fascinación por o
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![C](https://img.shields.io/badge/C-00599C?style=for-the-badge&logo=c&logoColor=white)
 ![SQL](https://img.shields.io/badge/SQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
-![Azure](https://img.shields.io/badge/Azure-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)
 ![Spring](https://img.shields.io/badge/Spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
 ![OpenShift](https://img.shields.io/badge/OpenShift-E00?style=for-the-badge&logo=redhatopenshift&logoColor=white)
 ![Elastic Stack](https://img.shields.io/badge/Elastic-005571?style=for-the-badge&logo=elasticstack&logoColor=white)
@@ -44,20 +43,21 @@ Estudio **Ingeniería de Sistemas**, pero también tengo gran fascinación por o
 ## 📈 GitHub Stats
 
 <p align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=h0w4r&show_icons=true&theme=tokyonight" alt="h0w4r's GitHub stats"/>
+  <img src="https://github-readme-stats.vercel.app/api?username=h0w4r&show_icons=true&theme=tokyonight" alt="Mis estadísticas"/>
   <img src="https://streak-stats.demolab.com/?user=h0w4r&theme=tokyonight&hide_border=true" alt="GitHub Streak"/>
   <br/>
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=h0w4r&layout=compact&theme=tokyonight&hide_border=true" alt="Top Langs"/>
+  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=h0w4r&layout=compact&theme=tokyonight&include_all_commits=true&count_private=true&hide_rank=false&hide_border=true" alt="Top Langs"/>
 </p>
 
+\n![Trophies](https://github-profile-trophy.vercel.app/?username=h0w4r&theme=onestar&no-frame=true)\n
+
+\n![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)\n![Spring](https://img.shields.io/badge/Spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white)\n... etc.\n
 ---
 
 ## 🔄 Última actividad
 
 <!--START_SECTION:activity-->
 <!--END_SECTION:activity-->
-
-> **Nota:** El feed se actualiza automáticamente mediante la acción `github-activity-readme`.
 
 ---
 
@@ -70,4 +70,5 @@ Estudio **Ingeniería de Sistemas**, pero también tengo gran fascinación por o
 ---
 
 > *“La tecnología es el medio; la curiosidad, el combustible.”* — anónimo.
+> <br>![Visitas](https://profile-counter.glitch.me/h0w4r/count.svg)<br>
 
