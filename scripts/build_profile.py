@@ -133,6 +133,11 @@ LINKEDIN_PUBLICATION_SIGNALS = re.compile(
 LINKEDIN_README_NOISE_PATTERNS = (
     "0 notificaciones",
     "0 notifications",
+    "Fuente sincronizada",
+    "actualización automática diaria",
+    "LinkedIn professional signals",
+    "**Headline:**",
+    "Última actualización automática",
     "Join LinkedIn",
     "Agree & Join LinkedIn",
     "Sign in to view",
@@ -1119,9 +1124,24 @@ def render_events(events: list[dict[str, Any]], limit: int) -> str:
     """Renderiza actividad pública reciente o un fallback honesto."""
     if not events:
         return "- Actividad pública no disponible en este momento; el generador seguirá intentando en la próxima ejecución."
+    grouped: list[dict[str, Any]] = []
+    index_by_key: dict[tuple[str, str], int] = {}
+    for event in events[: limit * 4]:
+        date = format_date(event.get("created_at"))
+        summary = summarize_event(event)
+        key = (date, summary)
+        if key in index_by_key:
+            grouped[index_by_key[key]]["count"] += 1
+            continue
+        index_by_key[key] = len(grouped)
+        grouped.append({"date": date, "summary": summary, "count": 1})
+        if len(grouped) >= limit:
+            break
+
     lines = []
-    for event in events[:limit]:
-        lines.append(f"- {format_date(event.get('created_at'))}: {summarize_event(event)}")
+    for item in grouped[:limit]:
+        suffix = f" · {item['count']} eventos" if item["count"] > 1 else ""
+        lines.append(f"- {item['date']}: {item['summary']}{suffix}")
     return "\n".join(lines)
 
 
@@ -1141,22 +1161,26 @@ def render_linkedin_snapshot(linkedin: dict[str, Any]) -> str:
         )
 
     labels = {
-        "experience": "Experiencia / Experience",
-        "projects": "Proyectos / Projects",
-        "courses": "Cursos / Courses",
+        "experience": "Experiencia reciente / Recent experience",
+        "projects": "Proyectos profesionales / Professional projects",
+        "courses": "Formación continua / Continuous learning",
         "publications": "Publicaciones / Publications",
         "certifications": "Certificaciones / Certifications",
-        "education": "Educación / Education",
+        "education": "Formación académica / Education",
     }
     lines = [
-        "## 🔗 Señales profesionales de LinkedIn / LinkedIn professional signals",
+        "## 🧑‍💻 Perfil profesional / Professional profile",
         "",
-        f"Fuente sincronizada: [LinkedIn]({linkedin.get('url')}) · actualización automática diaria.",
+        "Trabajo en la intersección entre sistemas empresariales, backends modernos y tooling con IA. "
+        "Mi foco es convertir problemas técnicos complejos en herramientas que otros desarrolladores puedan usar, revisar y mantener.",
+        "",
+        "<sub>I work at the intersection of enterprise systems, modern backends and AI-powered tooling. "
+        "My focus is turning complex technical problems into tools other developers can use, review and maintain.</sub>",
     ]
     if linkedin.get("headline"):
-        lines.extend(["", f"**Headline:** {md_escape(linkedin['headline'])}"])
+        lines.extend(["", f"**Foco actual / Current focus:** {md_escape(linkedin['headline'])}"])
     if linkedin.get("summary"):
-        lines.extend(["", f"**Resumen / About:** {md_escape(linkedin['summary'])}"])
+        lines.extend(["", f"**Trayectoria / Background:** {md_escape(linkedin['summary'])}"])
 
     sections = linkedin.get("sections", {})
     for key in ("experience", "projects", "courses", "publications", "certifications", "education"):
@@ -1225,16 +1249,15 @@ def render_readme(config: dict[str, Any], data: dict[str, Any]) -> str:
     pinned = "\n".join(f"- `{repo}`" for repo in config["pinnedRecommendation"])
     ascii_card = """
 <pre>
-+-- h0w4r.dev -----------------------------------------------+
-| IBM i/AS400 <-> Spring Boot <-> AI/Codex tooling           |
-| open source | automation | security-minded engineering      |
-+------------------------------------------------------------+
+┌─ h0w4r.dev ────────────────────────────────────────────────┐
+│ legacy systems -> modern tooling -> verifiable automation  │
+│ IBM i/AS400 · Spring Boot · MCP/Codex · security-minded    │
+└────────────────────────────────────────────────────────────┘
 </pre>
 """.strip()
 
     markdown = f"""
-<!-- Perfil generado automáticamente por scripts/build_profile.py. -->
-<!-- Fuente viva: APIs públicas de GitHub y perfil visual externo. Edita .github/profile.config.json para cambios manuales. -->
+<!-- Perfil generado por scripts/build_profile.py. -->
 
 <a href="{links['gravatar']}"><img align="right" width="130" src="{avatar_url}" alt="Chris Kirsch" /></a>
 
@@ -1245,11 +1268,11 @@ def render_readme(config: dict[str, Any], data: dict[str, Any]) -> str:
 
 {signal_badges}
 
-{profile['bioEs']}<br/>
-<sub>{profile['bioEn']}</sub>
+Soy Chris, software engineer en Lima. Construyo herramientas open source alrededor de IBM i/AS400, backends Java/Spring Boot y automatización con IA para desarrollo real.<br/>
+<sub>I am Chris, a software engineer based in Lima. I build open-source tools around IBM i/AS400, Java/Spring Boot backends and AI-assisted automation for real development workflows.</sub>
 
-Me gusta crear software que sea útil, verificable y fácil de mantener; especialmente cuando conecta mundos que normalmente no conversan bien entre sí: IBM i/AS400, backends modernos y agentes de IA.<br/>
-<sub>I like building useful, verifiable and maintainable software, especially when it connects worlds that usually do not talk nicely to each other: IBM i/AS400, modern backends and AI agents.</sub>
+Si llegaste por IBM i/AS400, tooling para IA, backends o seguridad defensiva: este es mi laboratorio público. Me gusta construir piezas que no solo funcionen en una demo, sino que se puedan instalar, auditar, documentar y mantener sin invocar espíritus del mainframe a medianoche.<br/>
+<sub>If you are here for IBM i/AS400, AI developer tooling, backends or defensive security: this is my public lab. I like building things that do not just work in a demo, but can be installed, audited, documented and maintained without summoning mainframe spirits at midnight.</sub>
 
 <br clear="right" />
 
@@ -1259,11 +1282,17 @@ Me gusta crear software que sea útil, verificable y fácil de mantener; especia
 
 ## 🧭 Qué estoy construyendo / What I build
 
+Me interesan los proyectos donde el valor está en conectar mundos que normalmente viven separados: sistemas empresariales clásicos, herramientas modernas para desarrolladores, automatización confiable y validación técnica con evidencia.
+<br/><sub>I care about projects that connect worlds that usually live apart: classic enterprise systems, modern developer tooling, reliable automation and evidence-driven technical validation.</sub>
+
 {chr(10).join(focus_lines)}
 
 {linkedin}
 
 ## 🧰 Stack vivo / Live stack
+
+Estas tecnologías aparecen en mis repos, mis experimentos y mi trabajo diario; no son stickers pegados al README porque sí.
+<br/><sub>These technologies show up across my repos, experiments and day-to-day work; they are not random stickers pasted into the README for decoration.</sub>
 
 {stack_badges}
 
@@ -1271,7 +1300,22 @@ Me gusta crear software que sea útil, verificable y fácil de mantener; especia
 
 ---
 
+## 🧪 Cómo construyo / How I build
+
+- **Evidencia antes que promesas:** prefiero pruebas, logs, validaciones y documentación ejecutable antes que frases bonitas que se caen al primer deploy.
+- **Automatización útil:** si una tarea se repite, la convierto en script, workflow o herramienta; si no aporta, no la inflo con ceremonia.
+- **Contexto real del sistema:** me interesa entender fuentes, datos, jobs, APIs y límites operativos antes de tocar una arquitectura.
+- **Open source con intención:** publico herramientas que resuelven fricción concreta y que otros devs puedan leer, ejecutar y adaptar.
+- **Seguridad práctica:** pienso en permisos, secretos, datos sensibles y superficies de ataque desde el diseño, no como checklist de último minuto.
+
+<sub>Evidence over promises, useful automation, real system context, intentional open source and practical security from the design stage.</sub>
+
+---
+
 ## 🚀 Ecosistema vivo / Live ecosystem
+
+Lo que más me representa ahora mismo: herramientas open source, integración con IBM i/AS400, automatización para desarrolladores y proyectos donde la documentación importa tanto como el código.
+<br/><sub>The work that represents me best right now: open-source tools, IBM i/AS400 integration, developer automation and projects where documentation matters as much as code.</sub>
 
 {featured}
 
@@ -1283,8 +1327,8 @@ Me gusta crear software que sea útil, verificable y fácil de mantener; especia
 
 ### 🔥 Repositorios activos / Active repositories
 
-Ordenados por último commit/push público para que lo más fresco suba primero.<br/>
-<sub>Sorted by latest public commit/push so the freshest work floats to the top.</sub>
+Mis repos más activos aparecen primero para que puedas ver rápido qué estoy empujando ahora.<br/>
+<sub>My most active repositories appear first so you can quickly see what I am pushing forward right now.</sub>
 
 {recent_repos}
 
@@ -1296,10 +1340,15 @@ Ordenados por último commit/push público para que lo más fresco suba primero.
 
 ## 🤝 Cómo puedo aportar / How I can help
 
-- **Dónde suelo aportar más valor:** modernización IBM i/AS400, tooling para desarrolladores, automatización con IA, backends Java/Spring y validación técnica reproducible.
-- **Where I usually add the most value:** IBM i/AS400 modernization, developer tooling, AI-assisted automation, Java/Spring backends and reproducible technical validation.
-- **Cómo trabajo:** me gustan los commits pequeños, la documentación clara, las pruebas que demuestran algo y las herramientas que eliminan fricción real.
-- **How I work:** I like small commits, clear documentation, tests that actually prove something and tools that remove real friction.
+Si estás explorando colaboración, contratación o simplemente revisando mi trabajo, estas son las zonas donde puedo aportar más rápido:
+
+- **Modernización IBM i/AS400:** entender sistemas existentes, documentar flujos reales, conectar RDi/Eclipse con herramientas modernas y reducir dependencia de conocimiento tribal.
+- **Tooling para desarrolladores:** MCPs, plugins, scripts y automatizaciones que eliminan fricción repetitiva en lugar de producir otra pantalla bonita que nadie mantiene.
+- **Backends y APIs:** Java/Spring Boot, integración REST, servicios internos y piezas que priorizan mantenibilidad, observabilidad y validación reproducible.
+- **Seguridad y datos:** análisis de vulnerabilidades, detección de información sensible, priorización CVE y automatización defensiva con foco práctico.
+- **Forma de trabajar:** commits pequeños, documentación clara, pruebas que demuestran algo y respeto por el contexto real del sistema.
+
+<sub>If you are exploring collaboration, hiring or just reviewing my work, I can contribute fastest in IBM i/AS400 modernization, developer tooling, Java/Spring backends, defensive security automation and evidence-driven engineering.</sub>
 
 ## 📬 Contacto / Contact
 
@@ -1314,7 +1363,7 @@ Ordenados por último commit/push público para que lo más fresco suba primero.
 
 ---
 
-<sub>Última actualización automática: {generated_date}. Rol público: `{md_escape(gravatar_role)}` en `{md_escape(gravatar.get('company') or profile['company'])}`.</sub>
+<sub>Perfil actualizado al {generated_date} · `{md_escape(gravatar_role)}` en `{md_escape(gravatar.get('company') or profile['company'])}` · Lima, Perú.</sub>
 """.strip() + "\n"
     return textwrap.dedent(markdown)
 

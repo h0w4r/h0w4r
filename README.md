@@ -1,5 +1,4 @@
-<!-- Perfil generado automáticamente por scripts/build_profile.py. -->
-<!-- Fuente viva: APIs públicas de GitHub y perfil visual externo. Edita .github/profile.config.json para cambios manuales. -->
+<!-- Perfil generado por scripts/build_profile.py. -->
 
 <a href="https://gravatar.com/ckirsch94"><img align="right" width="130" src="https://1.gravatar.com/avatar/27a55a433ec79b38e1a4bfed26d22164e9285be10557dc70b8930d4582110250?s=260" alt="Chris Kirsch" /></a>
 
@@ -12,24 +11,27 @@
 ![location: Lima, Perú](https://img.shields.io/badge/location-Lima%2C%20Per%C3%BA-059669?style=for-the-badge)
 ![updated: 2026-05-29 Lima, Perú (UTC-05:00)](https://img.shields.io/badge/updated-2026--05--29%20Lima%2C%20Per%C3%BA%20%28UTC--05%3A00%29-334155?style=for-the-badge)
 
-Hola, soy Chris. Construyo herramientas open source alrededor de IBM i/AS400, backends Java/Spring Boot y automatización con IA para desarrollo real.<br/>
-<sub>Hi, I am Chris. I build open-source tools around IBM i/AS400, Java/Spring Boot backends and AI-assisted automation for real development workflows.</sub>
+Soy Chris, software engineer en Lima. Construyo herramientas open source alrededor de IBM i/AS400, backends Java/Spring Boot y automatización con IA para desarrollo real.<br/>
+<sub>I am Chris, a software engineer based in Lima. I build open-source tools around IBM i/AS400, Java/Spring Boot backends and AI-assisted automation for real development workflows.</sub>
 
-Me gusta crear software que sea útil, verificable y fácil de mantener; especialmente cuando conecta mundos que normalmente no conversan bien entre sí: IBM i/AS400, backends modernos y agentes de IA.<br/>
-<sub>I like building useful, verifiable and maintainable software, especially when it connects worlds that usually do not talk nicely to each other: IBM i/AS400, modern backends and AI agents.</sub>
+Si llegaste por IBM i/AS400, tooling para IA, backends o seguridad defensiva: este es mi laboratorio público. Me gusta construir piezas que no solo funcionen en una demo, sino que se puedan instalar, auditar, documentar y mantener sin invocar espíritus del mainframe a medianoche.<br/>
+<sub>If you are here for IBM i/AS400, AI developer tooling, backends or defensive security: this is my public lab. I like building things that do not just work in a demo, but can be installed, audited, documented and maintained without summoning mainframe spirits at midnight.</sub>
 
 <br clear="right" />
 
 <pre>
-+-- h0w4r.dev -----------------------------------------------+
-| IBM i/AS400 <-> Spring Boot <-> AI/Codex tooling           |
-| open source | automation | security-minded engineering      |
-+------------------------------------------------------------+
+┌─ h0w4r.dev ────────────────────────────────────────────────┐
+│ legacy systems -> modern tooling -> verifiable automation  │
+│ IBM i/AS400 · Spring Boot · MCP/Codex · security-minded    │
+└────────────────────────────────────────────────────────────┘
 </pre>
 
 ---
 
 ## 🧭 Qué estoy construyendo / What I build
+
+Me interesan los proyectos donde el valor está en conectar mundos que normalmente viven separados: sistemas empresariales clásicos, herramientas modernas para desarrolladores, automatización confiable y validación técnica con evidencia.
+<br/><sub>I care about projects that connect worlds that usually live apart: classic enterprise systems, modern developer tooling, reliable automation and evidence-driven technical validation.</sub>
 
 - **IBM i / AS400** — RPGLE, CLLE, DDS, Db2 for i, RDi/Eclipse y modernización progresiva.  
   <sub>RPGLE, CLLE, DDS, Db2 for i, RDi/Eclipse and progressive modernization.</sub>
@@ -40,28 +42,33 @@ Me gusta crear software que sea útil, verificable y fácil de mantener; especia
 - **Seguridad y datos / Security and data** — Análisis de vulnerabilidades, OCR para información sensible, CVE scoring y automatización defensiva.  
   <sub>Vulnerability analysis, sensitive-data OCR, CVE scoring and defensive automation.</sub>
 
-## 🔗 Señales profesionales de LinkedIn / LinkedIn professional signals
+## 🧑‍💻 Perfil profesional / Professional profile
 
-Fuente sincronizada: [LinkedIn](https://www.linkedin.com/in/cehp94/) · actualización automática diaria.
+Trabajo en la intersección entre sistemas empresariales, backends modernos y tooling con IA. Mi foco es convertir problemas técnicos complejos en herramientas que otros desarrolladores puedan usar, revisar y mantener.
 
-**Headline:** Software Engineer · IBM i/AS400 · Spring Boot · AI/Codex tooling
+<sub>I work at the intersection of enterprise systems, modern backends and AI-powered tooling. My focus is turning complex technical problems into tools other developers can use, review and maintain.</sub>
 
-**Resumen / About:** Soy un profesional en Computación e Informática, especializado en el desarrollo de software para servidores IBM i (AS/400) y Linux. Tengo experiencia trabajando en proyectos de TI del sector bancario y creando tooling open source para desarrolladores.
+**Foco actual / Current focus:** Software Engineer · IBM i/AS400 · Spring Boot · AI/Codex tooling
 
-### Experiencia / Experience
+**Trayectoria / Background:** Soy un profesional en Computación e Informática, especializado en el desarrollo de software para servidores IBM i (AS/400) y Linux. Tengo experiencia trabajando en proyectos de TI del sector bancario y creando tooling open source para desarrolladores.
+
+### Experiencia reciente / Recent experience
 - Ingeniero de software · NTT DATA Europe & Latam · Jornada completa · oct. 2025 - actualidad · Lima, Perú · Híbrido
 
-### Proyectos / Projects
+### Proyectos profesionales / Professional projects
 - MCP "IBM i Docs" · Proyecto open source para la comunidad IBM i/AS400 · contexto documental confiable para asistentes IA y tooling de desarrollo
 
 ### Certificaciones / Certifications
 - GitHub Copilot · Microsoft · Expedición: ene. 2026 · Vencimiento: ene. 2028
 
-### Educación / Education
+### Formación académica / Education
 - Universidad Peruana de Ciencias Aplicadas · Systems Engineering
 - CIBERTEC · Egresado · Computación e Informática
 
 ## 🧰 Stack vivo / Live stack
+
+Estas tecnologías aparecen en mis repos, mis experimentos y mi trabajo diario; no son stickers pegados al README porque sí.
+<br/><sub>These technologies show up across my repos, experiments and day-to-day work; they are not random stickers pasted into the README for decoration.</sub>
 
 ![stack: IBM i](https://img.shields.io/badge/stack-IBM%20i-1f2937?style=for-the-badge)
 ![stack: RPGLE](https://img.shields.io/badge/stack-RPGLE-1f2937?style=for-the-badge)
@@ -82,7 +89,22 @@ Fuente sincronizada: [LinkedIn](https://www.linkedin.com/in/cehp94/) · actualiz
 
 ---
 
+## 🧪 Cómo construyo / How I build
+
+- **Evidencia antes que promesas:** prefiero pruebas, logs, validaciones y documentación ejecutable antes que frases bonitas que se caen al primer deploy.
+- **Automatización útil:** si una tarea se repite, la convierto en script, workflow o herramienta; si no aporta, no la inflo con ceremonia.
+- **Contexto real del sistema:** me interesa entender fuentes, datos, jobs, APIs y límites operativos antes de tocar una arquitectura.
+- **Open source con intención:** publico herramientas que resuelven fricción concreta y que otros devs puedan leer, ejecutar y adaptar.
+- **Seguridad práctica:** pienso en permisos, secretos, datos sensibles y superficies de ataque desde el diseño, no como checklist de último minuto.
+
+<sub>Evidence over promises, useful automation, real system context, intentional open source and practical security from the design stage.</sub>
+
+---
+
 ## 🚀 Ecosistema vivo / Live ecosystem
+
+Lo que más me representa ahora mismo: herramientas open source, integración con IBM i/AS400, automatización para desarrolladores y proyectos donde la documentación importa tanto como el código.
+<br/><sub>The work that represents me best right now: open-source tools, IBM i/AS400 integration, developer automation and projects where documentation matters as much as code.</sub>
 
 | Proyecto / Project | Foco / Focus | Impacto / Impact | Actividad / Activity |
 |---|---|---|---|
@@ -102,8 +124,8 @@ Fuente sincronizada: [LinkedIn](https://www.linkedin.com/in/cehp94/) · actualiz
 
 ### 🔥 Repositorios activos / Active repositories
 
-Ordenados por último commit/push público para que lo más fresco suba primero.<br/>
-<sub>Sorted by latest public commit/push so the freshest work floats to the top.</sub>
+Mis repos más activos aparecen primero para que puedas ver rápido qué estoy empujando ahora.<br/>
+<sub>My most active repositories appear first so you can quickly see what I am pushing forward right now.</sub>
 
 | Repo | Stack | Último commit/push | Descripción |
 |---|---|---:|---|
@@ -117,21 +139,26 @@ Ordenados por último commit/push público para que lo más fresco suba primero.
 
 ### 🛰️ Eventos públicos recientes / Recent public events
 
-- 2026-05-26: Push/actualización en `MCP-IBMiDocs` · rama `main`
-- 2026-05-26: Push/actualización en `MCP-IBMiDocs` · rama `main`
-- 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main`
-- 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main`
-- 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main`
-- 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main`
+- 2026-05-26: Push/actualización en `MCP-IBMiDocs` · rama `main` · 2 eventos
+- 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main` · 4 eventos
+- 2026-05-23: Push/actualización en `MCP-IBMiDocs` · rama `main`
+- 2026-05-20: Push/actualización en `MCP-IBMiDocs` · rama `main`
+- 2026-05-20: Pull request merged #1 en `MCP-IBMiDocs`
+- 2026-05-20: Pull request opened #1 en `MCP-IBMiDocs`
 
 ---
 
 ## 🤝 Cómo puedo aportar / How I can help
 
-- **Dónde suelo aportar más valor:** modernización IBM i/AS400, tooling para desarrolladores, automatización con IA, backends Java/Spring y validación técnica reproducible.
-- **Where I usually add the most value:** IBM i/AS400 modernization, developer tooling, AI-assisted automation, Java/Spring backends and reproducible technical validation.
-- **Cómo trabajo:** me gustan los commits pequeños, la documentación clara, las pruebas que demuestran algo y las herramientas que eliminan fricción real.
-- **How I work:** I like small commits, clear documentation, tests that actually prove something and tools that remove real friction.
+Si estás explorando colaboración, contratación o simplemente revisando mi trabajo, estas son las zonas donde puedo aportar más rápido:
+
+- **Modernización IBM i/AS400:** entender sistemas existentes, documentar flujos reales, conectar RDi/Eclipse con herramientas modernas y reducir dependencia de conocimiento tribal.
+- **Tooling para desarrolladores:** MCPs, plugins, scripts y automatizaciones que eliminan fricción repetitiva en lugar de producir otra pantalla bonita que nadie mantiene.
+- **Backends y APIs:** Java/Spring Boot, integración REST, servicios internos y piezas que priorizan mantenibilidad, observabilidad y validación reproducible.
+- **Seguridad y datos:** análisis de vulnerabilidades, detección de información sensible, priorización CVE y automatización defensiva con foco práctico.
+- **Forma de trabajar:** commits pequeños, documentación clara, pruebas que demuestran algo y respeto por el contexto real del sistema.
+
+<sub>If you are exploring collaboration, hiring or just reviewing my work, I can contribute fastest in IBM i/AS400 modernization, developer tooling, Java/Spring backends, defensive security automation and evidence-driven engineering.</sub>
 
 ## 📬 Contacto / Contact
 
@@ -151,4 +178,4 @@ Ordenados por último commit/push público para que lo más fresco suba primero.
 
 ---
 
-<sub>Última actualización automática: 2026-05-29 Lima, Perú (UTC-05:00). Rol público: `Software Engineer` en `NTTDATA`.</sub>
+<sub>Perfil actualizado al 2026-05-29 Lima, Perú (UTC-05:00) · `Software Engineer` en `NTTDATA` · Lima, Perú.</sub>
