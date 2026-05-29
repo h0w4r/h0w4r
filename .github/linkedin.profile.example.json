@@ -1,14 +1,17 @@
 {
   "headline": "Software Engineer · IBM i/AS400 · Spring Boot · AI/Codex tooling",
   "summary": "Soy un profesional en Computación e Informática, especializado en desarrollo de software para IBM i/AS400, Linux, backends modernos y tooling para desarrolladores.",
-  "experience": [
-    "Ingeniero de software · NTT DATA Europe & Latam · Jornada completa · Lima, Perú"
-  ],
   "projects": [
     "MCP \"IBM i Docs\" · Proyecto open source para la comunidad IBM i/AS400"
   ],
   "courses": [],
   "publications": [],
+  "publication_insights": [
+    "Comparto avances y aprendizajes alrededor de IBM i/AS400, MCPs y tooling para desarrollo asistido por IA.",
+    "Mis publicaciones tienden a convertir problemas técnicos en explicaciones reutilizables: contexto, decisión, implementación y siguiente mejora.",
+    "Me interesa visibilizar herramientas open source que reduzcan fricción real para otros desarrolladores, especialmente cuando conectan sistemas legacy con flujos modernos.",
+    "Cuando publico sobre seguridad o datos, el foco está en validaciones prácticas, automatización defensiva y evidencia técnica antes que teoría decorativa."
+  ],
   "certifications": [
     "GitHub Copilot · Microsoft"
   ],

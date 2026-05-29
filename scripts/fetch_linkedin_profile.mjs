@@ -140,6 +140,19 @@ try {
     };
   });
 
+  const activityUrl = profileUrl.replace(/\/?$/, '/recent-activity/all/');
+  try {
+    await page.goto(activityUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
+    await page.waitForTimeout(5000);
+    snapshot.activityRawText = await page
+      .locator('body')
+      .innerText({ timeout: 5000 })
+      .then((text) => text.slice(0, 60000))
+      .catch(() => '');
+  } catch {
+    snapshot.activityRawText = '';
+  }
+
   snapshot.title = compact(snapshot.title, 220);
   snapshot.name = compact(snapshot.name, 160);
   snapshot.headline = compact(snapshot.headline, 220);

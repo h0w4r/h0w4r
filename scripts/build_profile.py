@@ -144,7 +144,65 @@ LINKEDIN_README_NOISE_PATTERNS = (
     "authwall",
     "\n- Comentarios\n",
     "\n- Imágenes\n",
+    "Experiencia reciente / Recent experience",
+    "NTT DATA",
+    "NTTDATA",
+    "Jornada completa",
 )
+
+PUBLICATION_TOPIC_KEYWORDS = {
+    "IBM i/AS400": (
+        "ibm i",
+        "as/400",
+        "as400",
+        "rpgle",
+        "clle",
+        "db2 for i",
+        "rdi",
+        "eclipse",
+    ),
+    "tooling IA, MCP y Codex": (
+        "mcp",
+        "codex",
+        "ia",
+        "ai",
+        "llm",
+        "agente",
+        "agentes",
+        "assistant",
+        "copilot",
+    ),
+    "open source/documentación": (
+        "open source",
+        "github",
+        "documentación",
+        "documentation",
+        "docs",
+        "comunidad",
+        "community",
+    ),
+    "backends y APIs": (
+        "java",
+        "spring",
+        "api",
+        "rest",
+        "backend",
+        "servicio",
+        "service",
+    ),
+    "seguridad/datos": (
+        "seguridad",
+        "security",
+        "cve",
+        "vulnerabilidad",
+        "vulnerability",
+        "ocr",
+        "sensible",
+        "datos",
+        "data",
+        "azure",
+    ),
+}
 
 
 class FetchError(RuntimeError):
@@ -346,6 +404,25 @@ def normalize_linkedin_list(value: Any, *, limit: int) -> list[str]:
         else:
             text = str(item)
         text = compact_text(text)
+        if text and not is_linkedin_noise(text) and text not in items:
+            items.append(text)
+        if len(items) >= limit:
+            break
+    return items
+
+
+def normalize_linkedin_text_list(value: Any, *, limit: int = 8) -> list[str]:
+    """Normaliza textos largos como publicaciones, actividad o insights editoriales."""
+    if not value:
+        return []
+    raw_items = value if isinstance(value, list) else [value]
+    items: list[str] = []
+    for item in raw_items:
+        if isinstance(item, dict):
+            text = item.get("text") or item.get("content") or item.get("summary") or item.get("title") or ""
+        else:
+            text = str(item)
+        text = compact_text(text, max_len=360)
         if text and not is_linkedin_noise(text) and text not in items:
             items.append(text)
         if len(items) >= limit:
@@ -733,6 +810,9 @@ def parse_voyager_profile(payload: dict[str, Any], *, source: str, url: str, lim
             limit=limit,
         ),
     }
+    # El README público no muestra historial laboral; LinkedIn se usa aquí para
+    # perfil profesional, formación y señales editoriales/académicas.
+    sections.pop("experience", None)
     sections = {key: clean_linkedin_lines(values) for key, values in sections.items() if values}
     sections = {key: values for key, values in sections.items() if values}
     return {
@@ -769,16 +849,22 @@ def normalize_linkedin_payload(payload: dict[str, Any], *, source: str, url: str
     """Normaliza una fuente estructurada de LinkedIn al contrato interno del README."""
     sections: dict[str, list[str]] = {}
     for key in LINKEDIN_SECTION_ALIASES:
+        if key == "experience":
+            # No se expone experiencia laboral en el README de GitHub.
+            continue
         values = normalize_linkedin_list(payload.get(key), limit=limit)
         if key == "publications" and not any(LINKEDIN_PUBLICATION_SIGNALS.search(value) for value in values):
             values = []
         sections[key] = values
     raw_text = payload.get("rawText") or payload.get("raw_text") or ""
+    activity_text = payload.get("activityRawText") or payload.get("activity_raw_text") or ""
     if raw_text:
         lines = [compact_text(line, max_len=260) for line in str(raw_text).splitlines()]
         lines = [line for line in lines if line]
         extracted_sections = extract_linkedin_sections(lines, limit=limit)
         for key, values in extracted_sections.items():
+            if key == "experience":
+                continue
             sections.setdefault(key, [])
             for value in values:
                 if value not in sections[key] and len(sections[key]) < limit:
@@ -794,14 +880,30 @@ def normalize_linkedin_payload(payload: dict[str, Any], *, source: str, url: str
     if not summary and raw_text:
         summary = extract_linkedin_about([compact_text(line, max_len=260) for line in str(raw_text).splitlines() if line.strip()])
     headline = sanitize_linkedin_headline(payload.get("headline") or payload.get("title"))
+    posts = normalize_linkedin_text_list(payload.get("posts") or payload.get("activity"), limit=8)
+    if activity_text:
+        for line in clean_linkedin_lines(
+            [compact_text(line, max_len=360) for line in str(activity_text).splitlines() if line.strip()]
+        ):
+            if looks_like_publication_signal(line) and line not in posts:
+                posts.append(line)
+            if len(posts) >= 8:
+                break
+    publication_insights = normalize_linkedin_text_list(
+        payload.get("publication_insights") or payload.get("publicationInsights"),
+        limit=6,
+    )
+    available = bool(summary or headline or sections or publication_insights or posts)
     return {
-        "available": bool(summary or headline or sections),
+        "available": available,
         "source": source,
         "url": payload.get("url") or url,
         "headline": headline,
         "summary": summary,
         "sections": sections,
-        "reason": "" if (summary or headline or sections) else "sin datos profesionales estructurados",
+        "publication_insights": publication_insights,
+        "posts": posts,
+        "reason": "" if available else "sin datos profesionales estructurados",
     }
 
 
@@ -814,6 +916,7 @@ def parse_linkedin_html(raw_html: str, *, source: str, url: str, limit: int) -> 
     person = extract_json_ld_person(raw_html)
     lines = visible_text_from_html(raw_html)
     sections = extract_linkedin_sections(lines, limit=limit)
+    sections.pop("experience", None)
     summary = (
         compact_text(person.get("description"), max_len=360)
         or extract_meta_value(raw_html, "description", "og:description")
@@ -1152,6 +1255,80 @@ def render_contributions(contrib: dict[str, Any]) -> str:
     return f"{contrib['total']} contribuciones registradas por GitHub en {contrib['year']}."
 
 
+def publication_items_from_linkedin(linkedin: dict[str, Any]) -> list[str]:
+    """Obtiene textos de publicaciones/actividad profesional sin mezclar experiencia laboral."""
+    sections = linkedin.get("sections", {}) or {}
+    items: list[str] = []
+    for source in (
+        linkedin.get("publication_insights"),
+        linkedin.get("publicationInsights"),
+        linkedin.get("posts"),
+        linkedin.get("activity"),
+        sections.get("publications"),
+    ):
+        for item in normalize_linkedin_text_list(source, limit=10):
+            if item not in items:
+                items.append(item)
+    return items[:10]
+
+
+def analyze_publication_items(items: list[str]) -> list[str]:
+    """Sintetiza temas recurrentes a partir de publicaciones o insights ya extraídos."""
+    cleaned = clean_linkedin_lines(items)
+    if not cleaned:
+        return []
+
+    topic_hits: Counter[str] = Counter()
+    corpus = " ".join(cleaned).lower()
+    for topic, keywords in PUBLICATION_TOPIC_KEYWORDS.items():
+        topic_hits[topic] = sum(corpus.count(keyword.lower()) for keyword in keywords)
+
+    top_topics = [topic for topic, count in topic_hits.most_common(4) if count > 0]
+    insights: list[str] = []
+    if top_topics:
+        topic_text = top_topics[0] if len(top_topics) == 1 else ", ".join(top_topics[:-1]) + f" y {top_topics[-1]}"
+        insights.append(
+            f"Mis publicaciones giran principalmente alrededor de {topic_text}."
+        )
+
+    # Conserva las señales editoriales explícitas cuando el snapshot trae frases ya resumidas.
+    for item in cleaned:
+        if len(item) < 45:
+            continue
+        if item not in insights:
+            insights.append(item)
+        if len(insights) >= 4:
+            break
+    return insights[:4]
+
+
+def looks_like_publication_signal(text: str) -> bool:
+    """Filtra líneas de actividad que parecen contenido técnico y no navegación."""
+    if len(text) < 55 or is_linkedin_noise(text):
+        return False
+    lower = text.lower()
+    if any(marker in lower for marker in ("reposted", "liked by", "comentó", "reaccionó", "notificaciones")):
+        return False
+    return any(keyword.lower() in lower for keywords in PUBLICATION_TOPIC_KEYWORDS.values() for keyword in keywords)
+
+
+def render_publication_analysis(linkedin: dict[str, Any]) -> str:
+    """Renderiza aprendizajes de publicaciones solo cuando hay material real para analizar."""
+    insights = analyze_publication_items(publication_items_from_linkedin(linkedin))
+    if not insights:
+        return ""
+    lines = [
+        "### Ideas que suelo compartir / What I usually share",
+        "",
+        "Además del código, uso mis publicaciones para ordenar aprendizajes, compartir avances y dejar señales técnicas útiles para otros devs.",
+        "",
+        "<sub>Beyond code, I use my posts to organize learnings, share progress and leave useful technical signals for other developers.</sub>",
+        "",
+    ]
+    lines.extend(f"- {md_escape(insight)}" for insight in insights)
+    return "\n".join(lines)
+
+
 def render_linkedin_snapshot(linkedin: dict[str, Any]) -> str:
     """Renderiza un bloque profesional de LinkedIn si hay datos reales disponibles."""
     if not linkedin.get("available"):
@@ -1161,10 +1338,8 @@ def render_linkedin_snapshot(linkedin: dict[str, Any]) -> str:
         )
 
     labels = {
-        "experience": "Experiencia reciente / Recent experience",
         "projects": "Proyectos profesionales / Professional projects",
         "courses": "Formación continua / Continuous learning",
-        "publications": "Publicaciones / Publications",
         "certifications": "Certificaciones / Certifications",
         "education": "Formación académica / Education",
     }
@@ -1180,15 +1355,19 @@ def render_linkedin_snapshot(linkedin: dict[str, Any]) -> str:
     if linkedin.get("headline"):
         lines.extend(["", f"**Foco actual / Current focus:** {md_escape(linkedin['headline'])}"])
     if linkedin.get("summary"):
-        lines.extend(["", f"**Trayectoria / Background:** {md_escape(linkedin['summary'])}"])
+        lines.extend(["", f"**Perfil / Profile:** {md_escape(linkedin['summary'])}"])
 
     sections = linkedin.get("sections", {})
-    for key in ("experience", "projects", "courses", "publications", "certifications", "education"):
+    for key in ("education", "courses", "certifications", "projects"):
         values = sections.get(key) or []
         if not values:
             continue
         lines.extend(["", f"### {labels[key]}"])
         lines.extend(f"- {md_escape(value)}" for value in values)
+
+    publication_analysis = render_publication_analysis(linkedin)
+    if publication_analysis:
+        lines.extend(["", publication_analysis])
     return "\n".join(lines)
 
 
@@ -1205,7 +1384,6 @@ def render_readme(config: dict[str, Any], data: dict[str, Any]) -> str:
 
     avatar_url = gravatar.get("avatar_url") or github_user.get("avatar_url") or "https://avatars.githubusercontent.com/u/33362684?v=4"
     avatar_url = with_query_params(avatar_url, s="260")
-    gravatar_role = gravatar.get("job_title") or "Software Engineer"
     public_repos = github_user.get("public_repos", len(repos))
     followers = int(github_user.get("followers", 0) or 0)
     followers_min = int(config.get("activity", {}).get("followersMinDisplay", 100))
@@ -1363,7 +1541,7 @@ Si estás explorando colaboración, contratación o simplemente revisando mi tra
 
 ---
 
-<sub>Perfil actualizado al {generated_date} · `{md_escape(gravatar_role)}` en `{md_escape(gravatar.get('company') or profile['company'])}` · Lima, Perú.</sub>
+<sub>Perfil actualizado al {generated_date} · Lima, Perú.</sub>
 """.strip() + "\n"
     return textwrap.dedent(markdown)
 
