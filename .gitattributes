@@ -1,0 +1,9 @@
+# Normaliza saltos de línea para que README/workflows no cambien por autocrlf.
+* text=auto eol=lf
+
+# Binarios comunes si más adelante se agregan assets visuales.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
