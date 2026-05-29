@@ -260,7 +260,11 @@ def with_query_params(url: str, **params: str) -> str:
 
 
 def local_timestamp(profile: dict[str, Any]) -> str:
-    """Devuelve la hora de actualización en la zona horaria pública del perfil."""
+    """Devuelve la fecha de actualización en la zona horaria pública del perfil.
+
+    Se usa fecha, no minuto exacto, para que `--check` sea estable durante el día
+    y el workflow no genere commits ruidosos por diferencias de reloj.
+    """
     timezone_name = profile.get("timezone", "UTC")
     timezone_label = profile.get("timezoneLabel", timezone_name)
     try:
@@ -272,7 +276,7 @@ def local_timestamp(profile: dict[str, Any]) -> str:
 
     offset = now.strftime("%z")
     offset_text = f"UTC{offset[:3]}:{offset[3:]}" if offset else "UTC"
-    return f"{now:%Y-%m-%d %H:%M} {timezone_label} ({offset_text})"
+    return f"{now:%Y-%m-%d} {timezone_label} ({offset_text})"
 
 
 def repo_url(username: str, repo_name: str) -> str:
@@ -368,12 +372,7 @@ def render_contributions(contrib: dict[str, Any]) -> str:
     """Renderiza métricas de contribución con fallback si GraphQL no está disponible."""
     if not contrib.get("available"):
         return f"Contribuciones privadas/públicas: no disponibles en esta ejecución (`{md_escape(contrib.get('reason', 'sin detalle'))}`)."
-    return (
-        f"{contrib['total']} contribuciones en {contrib['year']} "
-        f"({contrib['commits']} commits públicos, {contrib['prs']} PR, "
-        f"{contrib['issues']} issues, {contrib['reviews']} reviews, "
-        f"{contrib['restricted']} contribuciones privadas/restringidas)."
-    )
+    return f"{contrib['total']} contribuciones registradas por GitHub en {contrib['year']}."
 
 
 def render_readme(config: dict[str, Any], data: dict[str, Any]) -> str:

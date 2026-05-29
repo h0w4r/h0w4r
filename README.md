@@ -10,7 +10,7 @@
 
 ![repos: 14](https://img.shields.io/badge/repos-14-2563eb?style=for-the-badge)
 ![location: Lima, Perú](https://img.shields.io/badge/location-Lima%2C%20Per%C3%BA-059669?style=for-the-badge)
-![updated: 2026-05-28 23:04 Lima, Perú (UTC-05:00)](https://img.shields.io/badge/updated-2026--05--28%2023%3A04%20Lima%2C%20Per%C3%BA%20%28UTC--05%3A00%29-334155?style=for-the-badge)
+![updated: 2026-05-28 Lima, Perú (UTC-05:00)](https://img.shields.io/badge/updated-2026--05--28%20Lima%2C%20Per%C3%BA%20%28UTC--05%3A00%29-334155?style=for-the-badge)
 
 Hola, soy Chris. Construyo herramientas open source alrededor de IBM i/AS400, backends Java/Spring Boot y automatización con IA para desarrollo real.<br/>
 <sub>Hi, I am Chris. I build open-source tools around IBM i/AS400, Java/Spring Boot backends and AI-assisted automation for real development workflows.</sub>
@@ -70,7 +70,7 @@ Me gusta crear software que sea útil, verificable y fácil de mantener; especia
 
 ## Actividad reciente / Recent activity
 
-**Resumen del año / Year snapshot:** 154 contribuciones en 2026 (46 commits públicos, 1 PR, 0 issues, 0 reviews, 102 contribuciones privadas/restringidas).
+**Resumen del año / Year snapshot:** 154 contribuciones registradas por GitHub en 2026.
 
 ### Repositorios activos / Active repositories
 
@@ -120,4 +120,4 @@ Me gusta crear software que sea útil, verificable y fácil de mantener; especia
 
 ---
 
-<sub>Última actualización automática: 2026-05-28 23:04 Lima, Perú (UTC-05:00). Rol público: `Software Engineer` en `NTTDATA`.</sub>
+<sub>Última actualización automática: 2026-05-28 Lima, Perú (UTC-05:00). Rol público: `Software Engineer` en `NTTDATA`.</sub>
