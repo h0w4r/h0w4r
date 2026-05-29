@@ -1,76 +1,123 @@
-# ¡Hola, soy Christian! 👋
+<!-- Perfil generado automáticamente por scripts/build_profile.py. -->
+<!-- Fuente viva: GitHub API + Gravatar API. Edita .github/profile.config.json para cambios manuales. -->
 
-### Desarrollador C/C++, RPG y Java EE · Estudiante · Entusiasta de temas UFO / UAPs, Física teórica e IA 🚀🛸
+<img align="right" width="130" src="https://1.gravatar.com/avatar/27a55a433ec79b38e1a4bfed26d22164e9285be10557dc70b8930d4582110250?s=260" alt="Avatar de Chris Kirsch" />
 
-```text
- _   _                              _               _           
-| | | | ___  _ __ ___   ___ _ __   | |__   ___  ___| | _____ ___ 
-| |_| |/ _ \| '_ ` _ \ / _ \ '__|  | '_ \ / _ \/ __| |/ / __/ _ \
-|  _  | (_) | | | | | |  __/ |     | | | |  __/ (__|   < (_|  __/
-|_| |_|\___/|_| |_| |_|\___|_|     |_| |_|\___|\___|_|\_\___\___|
-```
+# Chris Kirsch · h0w4r
 
-## Sobre mí
+**Software Engineer · IBM i/AS400 · Spring Boot · tooling IA/Codex · open source**  
+<sub>**Software Engineer · IBM i/AS400 · Spring Boot · AI/Codex tooling · open source**</sub>
 
-¡Hola! Soy **Chris** — Desarrollador de software con JAVA, RPG y C/C++.
+![repos: 14](https://img.shields.io/badge/repos-14-2563eb?style=for-the-badge)
+![followers: 2](https://img.shields.io/badge/followers-2-7c3aed?style=for-the-badge)
+![location: Lima, Perú](https://img.shields.io/badge/location-Lima%2C%20Per%C3%BA-059669?style=for-the-badge)
+![updated: 2026-05-29 UTC](https://img.shields.io/badge/updated-2026--05--29%20UTC-334155?style=for-the-badge)
 
-Estudio **Ingeniería de Sistemas**, pero también tengo gran fascinación por otros temas como la **física teórica, los fenómenos anómalos y el arte**.
+Construyo herramientas para que entornos legacy, plataformas modernas y agentes de IA trabajen juntos sin drama innecesario.  
+<sub>I build tools that help legacy systems, modern platforms and AI agents work together without unnecessary drama.</sub>
 
-- 🔭 **Ahora mismo:** Participando en un proyecto grande de actualización de un core de transacciones con tarjetas de débito.
-- 🌱 **Repasando:** C/C++ · Java EE con Spring  
-- 🌱 **Aprendiendo:** C/C++ avanzado · Bash scripting · Software de medios de pago  
-- 👯 **Colaboro en:** Proyecto de predicción de criticidad de vulnerabilidades con Machine Learning (Aprendizaje supervisado)  
-- 💬 **Pregúntame sobre:** IBM i / RPGLE · DB2 · Software bancario · ML pipelines · Java  
-- 📫 **Contacto:** [LinkedIn](https://www.linkedin.com/in/cehp94/) · cehprad@gmail.com
-- ⚡ **Dato curioso:** Juego Brawlhalla y me gusta ver series policiales  
+> Perfil vivo para reclutadores, equipos técnicos y devs open source. Si algo cambió en mi GitHub o Gravatar, este README debería enterarse antes que yo tenga que pelearme con Markdown a mano.
+>
+> Live profile for recruiters, technical teams and open-source developers. If my GitHub or Gravatar changes, this README should notice before I manually wrestle with Markdown.
 
 ---
 
-## 🛠️ Tech Stack
+## Qué estoy construyendo / What I build
 
-![C](https://img.shields.io/badge/C-00599C?style=for-the-badge&logo=c&logoColor=white)
-![C++](https://img.shields.io/badge/C++-00599C?style=for-the-badge&logo=cplusplus&logoColor=white)
-![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
-![Spring](https://img.shields.io/badge/Spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
-![RPGLE](https://img.shields.io/badge/RPGLE-009688?style=for-the-badge)
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![SQL](https://img.shields.io/badge/SQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
-![DB2](https://img.shields.io/badge/DB2-006699?style=for-the-badge&logo=ibm&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
-![OpenShift](https://img.shields.io/badge/OpenShift-E00?style=for-the-badge&logo=redhatopenshift&logoColor=white)
-![Elastic Stack](https://img.shields.io/badge/Elastic-005571?style=for-the-badge&logo=elasticstack&logoColor=white)
-![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
-![Machine Learning](https://img.shields.io/badge/ML-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)
-![REST](https://img.shields.io/badge/REST-25A162?style=for-the-badge&logoColor=white)
+- **IBM i / AS400** — RPGLE, CLLE, DDS, Db2 for i, RDi/Eclipse y modernización progresiva.  
+  <sub>RPGLE, CLLE, DDS, Db2 for i, RDi/Eclipse and progressive modernization.</sub>
+- **Backends y APIs / Backends and APIs** — Java, Spring Boot, REST, integración con servicios y automatización de flujos técnicos.  
+  <sub>Java, Spring Boot, REST, service integration and technical workflow automation.</sub>
+- **Tooling IA para desarrollo / AI developer tooling** — MCPs, plugins para Codex/RDi, migradores de configuración y validaciones reproducibles.  
+  <sub>MCPs, Codex/RDi plugins, configuration migrators and reproducible validations.</sub>
+- **Seguridad y datos / Security and data** — Análisis de vulnerabilidades, OCR para información sensible, CVE scoring y automatización defensiva.  
+  <sub>Vulnerability analysis, sensitive-data OCR, CVE scoring and defensive automation.</sub>
 
----
+## Stack vivo / Live stack
 
-## 📈 GitHub Stats
+![stack: IBM i](https://img.shields.io/badge/stack-IBM%20i-1f2937?style=for-the-badge)
+![stack: RPGLE](https://img.shields.io/badge/stack-RPGLE-1f2937?style=for-the-badge)
+![stack: CLLE](https://img.shields.io/badge/stack-CLLE-1f2937?style=for-the-badge)
+![stack: Db2 for i](https://img.shields.io/badge/stack-Db2%20for%20i-1f2937?style=for-the-badge)
+![stack: Java](https://img.shields.io/badge/stack-Java-1f2937?style=for-the-badge)
+![stack: Spring Boot](https://img.shields.io/badge/stack-Spring%20Boot-1f2937?style=for-the-badge)
+![stack: Python](https://img.shields.io/badge/stack-Python-1f2937?style=for-the-badge)
+![stack: PowerShell](https://img.shields.io/badge/stack-PowerShell-1f2937?style=for-the-badge)
+![stack: C](https://img.shields.io/badge/stack-C-1f2937?style=for-the-badge)
+![stack: C++](https://img.shields.io/badge/stack-C%2B%2B-1f2937?style=for-the-badge)
+![stack: TypeScript](https://img.shields.io/badge/stack-TypeScript-1f2937?style=for-the-badge)
+![stack: GitHub Actions](https://img.shields.io/badge/stack-GitHub%20Actions-1f2937?style=for-the-badge)
+![stack: MCP](https://img.shields.io/badge/stack-MCP-1f2937?style=for-the-badge)
+![stack: Codex](https://img.shields.io/badge/stack-Codex-1f2937?style=for-the-badge)
 
-<p align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=h0w4r&show_icons=true&theme=tokyonight" alt="Mis estadísticas"/>
-  <img src="https://streak-stats.demolab.com/?user=h0w4r&theme=tokyonight&hide_border=true" alt="GitHub Streak"/>
-  <br/>
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=h0w4r&layout=compact&theme=tokyonight&include_all_commits=true&count_private=true&hide_rank=false&hide_border=true" alt="Top Langs"/>
-</p>
-
----
-
-## 🔄 Última actividad
-
-<!--START_SECTION:activity-->
-<!--END_SECTION:activity-->
+**Lenguajes detectados en repos públicos / Languages detected from public repos:** Python, Java, C, PowerShell, C++, HTML, TypeScript, JavaScript.
 
 ---
 
-## 📝 Artículos & Proyectos Destacados
+## Ecosistema vivo / Live ecosystem
 
-- **Cliente web REST en C** con libcurl y parson  
-- **Predicción de Severidad de CVEs** – Proyecto en progreso  
-- **Kernel de Sistema Operativo en C** - Proyecto en planificación  
+| Proyecto / Project | Foco / Focus | Impacto / Impact | Señal viva / Live signal |
+|---|---|---|---|
+| [`MCP-IBMiDocs`](https://github.com/h0w4r/MCP-IBMiDocs) | MCP comunitario para consultar documentación IBM i/AS400 desde corpus local.<br/><sub>Community MCP for IBM i/AS400 documentation from a local corpus.</sub> | Reduce alucinaciones técnicas al contrastar comandos, mensajes y lenguajes IBM i contra documentación versionada.<br/><sub>Reduces technical hallucinations by grounding IBM i commands, messages and languages in versioned documentation.</sub> | HTML · ⭐ 1 · push 2026-05-26 |
+| [`Plugin-Codex-para-RDi`](https://github.com/h0w4r/Plugin-Codex-para-RDi) | Integración Codex para IBM RDi/Eclipse con contexto de editores, RSE y fuentes remotas.<br/><sub>Codex integration for IBM RDi/Eclipse with editor, RSE and remote source context.</sub> | Acerca agentes de IA a flujos reales de mantenimiento IBM i sin romper el control del desarrollador.<br/><sub>Brings AI agents closer to real IBM i maintenance workflows while preserving developer control.</sub> | Java · ⭐ 0 · push 2026-04-28 |
+| [`as400-mcp`](https://github.com/h0w4r/as400-mcp) | Servidor MCP read-only para bibliotecas, tablas, fuentes y metadatos AS400/IBM i vía ODBC.<br/><sub>Read-only MCP server for AS400/IBM i libraries, tables, source members and metadata via ODBC.</sub> | Permite inspección segura de entornos IBM i desde asistentes y herramientas modernas.<br/><sub>Enables safe IBM i environment inspection from assistants and modern tools.</sub> | Python · ⭐ 0 · push 2026-05-19 |
+| [`Codex-Migration-tool`](https://github.com/h0w4r/Codex-Migration-tool) | Migrador Windows para configuración global de Codex App, MCPs y secretos cifrados.<br/><sub>Windows migrator for Codex App global config, MCPs and encrypted secrets.</sub> | Hace repetibles las mudanzas de entornos Codex sin perder servidores MCP ni configuración crítica.<br/><sub>Makes Codex environment moves repeatable without losing MCP servers or critical configuration.</sub> | PowerShell · ⭐ 0 · push 2026-04-27 |
+| [`detector-informacion-sensible-azure-ocr`](https://github.com/h0w4r/detector-informacion-sensible-azure-ocr) | API Java/Spring para detectar información sensible en imágenes usando Azure OCR.<br/><sub>Java/Spring API to detect sensitive information in images using Azure OCR.</sub> | Convierte OCR en una validación defensiva accionable para datos sensibles.<br/><sub>Turns OCR into actionable defensive validation for sensitive data.</sub> | Java · ⭐ 0 · push 2025-04-30 |
+| [`CVE-Exploitability-Prediction-with-Logistic-Regression`](https://github.com/h0w4r/CVE-Exploitability-Prediction-with-Logistic-Regression) | API y pipeline para gestión y predicción de explotabilidad de vulnerabilidades CVE.<br/><sub>API and pipeline for CVE vulnerability management and exploitability prediction.</sub> | Une análisis de vulnerabilidades, datos y servicios backend para priorización técnica.<br/><sub>Connects vulnerability analysis, data and backend services for technical prioritization.</sub> | Python · ⭐ 0 · push 2025-05-14 |
+| [`web-client-C`](https://github.com/h0w4r/web-client-C) | Biblioteca REST en C enfocada en autorización de transacciones y concurrencia HTTP.<br/><sub>REST client library in C focused on transaction authorization and HTTP concurrency.</sub> | Demuestra bajo nivel, networking y diseño de librerías con foco en performance.<br/><sub>Shows low-level networking and library design with a performance mindset.</sub> | C · ⭐ 0 · push 2025-06-02 |
 
 ---
 
-> *“La tecnología es el medio; la curiosidad, el combustible.”* — anónimo.
-<br>![Visitas](https://profile-counter.glitch.me/h0w4r/count.svg)<br>
+## Actividad reciente / Recent activity
 
+**Resumen del año / Year snapshot:** 148 contribuciones en 2026 (40 commits públicos, 1 PR, 0 issues, 0 reviews, 102 contribuciones privadas/restringidas).
+
+### Repositorios activos / Active repositories
+
+| Repo | Stack | Último push | Descripción |
+|---|---|---:|---|
+| [`MCP-IBMiDocs`](https://github.com/h0w4r/MCP-IBMiDocs) | HTML | 2026-05-26 | MCP comunitario para consultar documentación IBM i/AS400 desde un corpus local sin depender de APIs externas. |
+| [`as400-mcp`](https://github.com/h0w4r/as400-mcp) | Python | 2026-05-19 | Mi versión de Servidor MCP para AS400/IBM i: trabaje con bibliotecas, tablas y miembros de origen a través de una conexión ODBC |
+| [`Plugin-Codex-para-RDi`](https://github.com/h0w4r/Plugin-Codex-para-RDi) | Java | 2026-04-28 | Proyecto público en evolución. |
+| [`Codex-Migration-tool`](https://github.com/h0w4r/Codex-Migration-tool) | PowerShell | 2026-04-27 | Proyecto público en evolución. |
+| [`Tema-Matrix-VsCode`](https://github.com/h0w4r/Tema-Matrix-VsCode) | multi-stack | 2026-03-14 | Tema matrix para VS Code |
+| [`sedapal`](https://github.com/h0w4r/sedapal) | Python | 2025-10-12 | Proyecto público en evolución. |
+| [`web-client-C`](https://github.com/h0w4r/web-client-C) | C | 2025-06-02 | Proyecto público en evolución. |
+
+### Eventos públicos recientes / Recent public events
+
+- 2026-05-26: Push/actualización en `MCP-IBMiDocs` · rama `main`
+- 2026-05-26: Push/actualización en `MCP-IBMiDocs` · rama `main`
+- 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main`
+- 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main`
+- 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main`
+- 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main`
+
+---
+
+## Para reclutadores y colaboradores / For recruiters and collaborators
+
+- **Dónde aporto más valor:** modernización IBM i/AS400, tooling para desarrolladores, automatización con IA, backends Java/Spring y validación técnica reproducible.
+- **Where I add the most value:** IBM i/AS400 modernization, developer tooling, AI-assisted automation, Java/Spring backends and reproducible technical validation.
+- **Cómo trabajo:** prefiero software verificable, documentación clara, commits pequeños y herramientas que reduzcan fricción real — no teatro de productividad con fuegos artificiales.
+- **How I work:** I prefer verifiable software, clear documentation, small commits and tools that reduce real friction — not productivity theater with fireworks.
+
+## Contacto / Contact
+
+[LinkedIn](https://www.linkedin.com/in/cehp94/) · [Gravatar](https://gravatar.com/ckirsch94) · [ORCID](https://orcid.org/0009-0009-2366-0494) · [GitHub](https://github.com/h0w4r)
+
+<details>
+<summary>Repos pineados recomendados / Recommended pinned repositories</summary>
+
+- `MCP-IBMiDocs`
+- `Plugin-Codex-para-RDi`
+- `as400-mcp`
+- `Codex-Migration-tool`
+- `detector-informacion-sensible-azure-ocr`
+- `web-client-C`
+
+</details>
+
+---
+
+<sub>Última actualización automática: 2026-05-29 UTC. Perfil Gravatar: `Software Engineer` en `NTTDATA` · https://gravatar.com/ckirsch94</sub>

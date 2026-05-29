@@ -1,0 +1,113 @@
+{
+  "profile": {
+    "username": "h0w4r",
+    "displayName": "Chris Kirsch",
+    "shortName": "Chris",
+    "gravatarSlug": "ckirsch94",
+    "company": "NTTDATA",
+    "location": "Lima, Perú",
+    "headlineEs": "Software Engineer · IBM i/AS400 · Spring Boot · tooling IA/Codex · open source",
+    "headlineEn": "Software Engineer · IBM i/AS400 · Spring Boot · AI/Codex tooling · open source",
+    "bioEs": "Construyo herramientas para que entornos legacy, plataformas modernas y agentes de IA trabajen juntos sin drama innecesario.",
+    "bioEn": "I build tools that help legacy systems, modern platforms and AI agents work together without unnecessary drama.",
+    "links": {
+      "linkedin": "https://www.linkedin.com/in/cehp94/",
+      "gravatar": "https://gravatar.com/ckirsch94",
+      "orcid": "https://orcid.org/0009-0009-2366-0494",
+      "github": "https://github.com/h0w4r"
+    }
+  },
+  "focusAreas": [
+    {
+      "labelEs": "IBM i / AS400",
+      "labelEn": "IBM i / AS400",
+      "detailsEs": "RPGLE, CLLE, DDS, Db2 for i, RDi/Eclipse y modernización progresiva.",
+      "detailsEn": "RPGLE, CLLE, DDS, Db2 for i, RDi/Eclipse and progressive modernization."
+    },
+    {
+      "labelEs": "Backends y APIs",
+      "labelEn": "Backends and APIs",
+      "detailsEs": "Java, Spring Boot, REST, integración con servicios y automatización de flujos técnicos.",
+      "detailsEn": "Java, Spring Boot, REST, service integration and technical workflow automation."
+    },
+    {
+      "labelEs": "Tooling IA para desarrollo",
+      "labelEn": "AI developer tooling",
+      "detailsEs": "MCPs, plugins para Codex/RDi, migradores de configuración y validaciones reproducibles.",
+      "detailsEn": "MCPs, Codex/RDi plugins, configuration migrators and reproducible validations."
+    },
+    {
+      "labelEs": "Seguridad y datos",
+      "labelEn": "Security and data",
+      "detailsEs": "Análisis de vulnerabilidades, OCR para información sensible, CVE scoring y automatización defensiva.",
+      "detailsEn": "Vulnerability analysis, sensitive-data OCR, CVE scoring and defensive automation."
+    }
+  ],
+  "stackBadges": [
+    "IBM i", "RPGLE", "CLLE", "Db2 for i", "Java", "Spring Boot", "Python", "PowerShell", "C", "C++", "TypeScript", "GitHub Actions", "MCP", "Codex"
+  ],
+  "featuredRepositories": [
+    {
+      "name": "MCP-IBMiDocs",
+      "taglineEs": "MCP comunitario para consultar documentación IBM i/AS400 desde corpus local.",
+      "taglineEn": "Community MCP for IBM i/AS400 documentation from a local corpus.",
+      "impactEs": "Reduce alucinaciones técnicas al contrastar comandos, mensajes y lenguajes IBM i contra documentación versionada.",
+      "impactEn": "Reduces technical hallucinations by grounding IBM i commands, messages and languages in versioned documentation."
+    },
+    {
+      "name": "Plugin-Codex-para-RDi",
+      "taglineEs": "Integración Codex para IBM RDi/Eclipse con contexto de editores, RSE y fuentes remotas.",
+      "taglineEn": "Codex integration for IBM RDi/Eclipse with editor, RSE and remote source context.",
+      "impactEs": "Acerca agentes de IA a flujos reales de mantenimiento IBM i sin romper el control del desarrollador.",
+      "impactEn": "Brings AI agents closer to real IBM i maintenance workflows while preserving developer control."
+    },
+    {
+      "name": "as400-mcp",
+      "taglineEs": "Servidor MCP read-only para bibliotecas, tablas, fuentes y metadatos AS400/IBM i vía ODBC.",
+      "taglineEn": "Read-only MCP server for AS400/IBM i libraries, tables, source members and metadata via ODBC.",
+      "impactEs": "Permite inspección segura de entornos IBM i desde asistentes y herramientas modernas.",
+      "impactEn": "Enables safe IBM i environment inspection from assistants and modern tools."
+    },
+    {
+      "name": "Codex-Migration-tool",
+      "taglineEs": "Migrador Windows para configuración global de Codex App, MCPs y secretos cifrados.",
+      "taglineEn": "Windows migrator for Codex App global config, MCPs and encrypted secrets.",
+      "impactEs": "Hace repetibles las mudanzas de entornos Codex sin perder servidores MCP ni configuración crítica.",
+      "impactEn": "Makes Codex environment moves repeatable without losing MCP servers or critical configuration."
+    },
+    {
+      "name": "detector-informacion-sensible-azure-ocr",
+      "taglineEs": "API Java/Spring para detectar información sensible en imágenes usando Azure OCR.",
+      "taglineEn": "Java/Spring API to detect sensitive information in images using Azure OCR.",
+      "impactEs": "Convierte OCR en una validación defensiva accionable para datos sensibles.",
+      "impactEn": "Turns OCR into actionable defensive validation for sensitive data."
+    },
+    {
+      "name": "CVE-Exploitability-Prediction-with-Logistic-Regression",
+      "taglineEs": "API y pipeline para gestión y predicción de explotabilidad de vulnerabilidades CVE.",
+      "taglineEn": "API and pipeline for CVE vulnerability management and exploitability prediction.",
+      "impactEs": "Une análisis de vulnerabilidades, datos y servicios backend para priorización técnica.",
+      "impactEn": "Connects vulnerability analysis, data and backend services for technical prioritization."
+    },
+    {
+      "name": "web-client-C",
+      "taglineEs": "Biblioteca REST en C enfocada en autorización de transacciones y concurrencia HTTP.",
+      "taglineEn": "REST client library in C focused on transaction authorization and HTTP concurrency.",
+      "impactEs": "Demuestra bajo nivel, networking y diseño de librerías con foco en performance.",
+      "impactEn": "Shows low-level networking and library design with a performance mindset."
+    }
+  ],
+  "pinnedRecommendation": [
+    "MCP-IBMiDocs",
+    "Plugin-Codex-para-RDi",
+    "as400-mcp",
+    "Codex-Migration-tool",
+    "detector-informacion-sensible-azure-ocr",
+    "web-client-C"
+  ],
+  "activity": {
+    "recentRepoLimit": 7,
+    "recentEventLimit": 6,
+    "languageRepoLimit": 20
+  }
+}

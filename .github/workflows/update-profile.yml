@@ -1,0 +1,59 @@
+name: Actualizar perfil vivo
+
+on:
+  schedule:
+    # GitHub usa UTC; una ejecución diaria evita ruido y mantiene vivo el README.
+    - cron: "17 11 * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "README.md"
+      - "scripts/build_profile.py"
+      - ".github/profile.config.json"
+      - ".github/workflows/update-profile.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: perfil-vivo-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-profile:
+    name: Regenerar README del perfil
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v6
+
+      - name: Preparar Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - name: Generar README desde GitHub + Gravatar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/build_profile.py --write
+
+      - name: Validar README generado
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/build_profile.py --check
+
+      - name: Commit de cambios automáticos
+        run: |
+          if [[ -z "$(git status --porcelain README.md)" ]]; then
+            echo "README.md ya está actualizado; no hay commit nuevo."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "chore: actualiza perfil vivo"
+          git push
