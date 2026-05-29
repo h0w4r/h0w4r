@@ -9,7 +9,6 @@ on:
     branches:
       - main
     paths:
-      - "README.md"
       - "scripts/build_profile.py"
       - ".github/profile.config.json"
       - ".github/workflows/update-profile.yml"

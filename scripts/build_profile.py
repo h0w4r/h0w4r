@@ -498,6 +498,10 @@ def collect_data(config: dict[str, Any]) -> dict[str, Any]:
 
     try:
         events = github_get(f"/users/{username}/events/public?per_page=30", token) or []
+        # Evita que los commits automáticos del propio perfil ensucien la actividad
+        # pública y generen cambios circulares en el README.
+        profile_repo = f"{username}/{username}"
+        events = [event for event in events if event.get("repo", {}).get("name") != profile_repo]
     except FetchError:
         events = []
 
