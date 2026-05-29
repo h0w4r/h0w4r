@@ -48,6 +48,29 @@ Trabajo en la intersección entre sistemas empresariales, backends modernos y to
 
 <sub>I work at the intersection of enterprise systems, modern backends and AI-powered tooling. My focus is turning complex technical problems into tools other developers can use, review and maintain.</sub>
 
+### Formación académica / Education
+- Universidad Peruana de Ciencias Aplicadas · Systems Engineering
+- CIBERTEC · Egresado , Computación e Informática · ago. 2017 – jul. 2021
+- ICPNA · Inglés Avanzado
+- Zero To Mastery Academy
+
+### Certificaciones / Certifications
+- GitHub Copilot · Microsoft · Expedición: ene. 2026 · Vencimiento: ene. 2028 · Aptitudes: IA generativa
+- GenAI Academy: Yellow Belt Level 2 for Engineers · Expedición: nov. 2025 · Aptitudes: IA generativa, Prompts de inteligencia artificial
+- UX Design Fundamentals · California Institute of the Arts · Expedición: jun. 2023
+- Using Databases with Python · University of Michigan · Aptitudes: Python
+
+### Ideas que suelo compartir / What I usually share
+
+Además del código, uso mis publicaciones para ordenar aprendizajes, compartir avances y dejar señales técnicas útiles para otros devs.
+
+<sub>Beyond code, I use my posts to organize learnings, share progress and leave useful technical signals for other developers.</sub>
+
+- Mis publicaciones giran principalmente alrededor de IBM i/AS400, tooling IA, MCP y Codex y open source/documentación.
+- Hoy quiero compartir mi primer proyecto open source para la comunidad IBM i / AS400, y también el primero que publico por aquí:
+- La idea nació de una necesidad muy concreta: usar agentes de IA para trabajar con IBM i sin depender solo de “lo que el modelo cree recordar”.
+- Quienes hemos trabajado con lenguajes RPGLE, SQLRPGLE, CLLE, DDS, comandos IBM i, mensajes RNF o Db2 for i sabemos que los detalles importan. Un parámetro mal recordado, una versión mezclada o una explicación incompleta puede hacer perder bastante tiempo.
+
 ## 🧰 Stack vivo / Live stack
 
 Estas tecnologías aparecen en mis repos, mis experimentos y mi trabajo diario; no son stickers pegados al README porque sí.
@@ -103,7 +126,7 @@ Lo que más me representa ahora mismo: herramientas open source, integración co
 
 ## 📡 Actividad reciente / Recent activity
 
-**Resumen del año / Year snapshot:** 178 contribuciones registradas por GitHub en 2026.
+**Resumen del año / Year snapshot:** 181 contribuciones registradas por GitHub en 2026.
 
 ### 🔥 Repositorios activos / Active repositories
 
@@ -122,7 +145,7 @@ Mis repos más activos aparecen primero para que puedas ver rápido qué estoy e
 
 ### 🛰️ Eventos públicos recientes / Recent public events
 
-- 2026-05-26: Push/actualización en `MCP-IBMiDocs` · rama `main` · 2 eventos
+- Actividad pública no disponible en este momento; el generador seguirá intentando en la próxima ejecución.
 
 ---
 

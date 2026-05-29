@@ -158,8 +158,6 @@ LINKEDIN_README_NOISE_PATTERNS = (
     "\n- Comentarios\n",
     "\n- Imágenes\n",
     "Experiencia reciente / Recent experience",
-    "NTT DATA",
-    "NTTDATA",
     "Jornada completa",
 )
 
@@ -642,6 +640,225 @@ def extract_linkedin_about(lines: list[str]) -> str:
     return ""
 
 
+def sanitize_linkedin_summary(value: Any) -> str:
+    """Acepta solo resúmenes personales/profesionales, no footer ni páginas rotas."""
+    summary = compact_text(value, max_len=360)
+    if not summary or is_linkedin_noise(summary):
+        return ""
+    lower = summary.lower()
+    bad_markers = (
+        "privacidad y condiciones",
+        "esta página no existe",
+        "comprueba la url",
+        "controles de invitados",
+        "linkedin corporation",
+    )
+    if any(marker in lower for marker in bad_markers):
+        return ""
+    if len(summary) < 35:
+        return ""
+    return summary
+
+
+DETAIL_SECTION_MARKER = re.compile(r"^\[linkedin:(?P<key>[a-z_]+)\]$", re.IGNORECASE)
+
+DETAIL_STOP_PREFIXES = (
+    "idioma del perfil",
+    "otros perfiles vistos",
+    "acerca de",
+    "accesibilidad",
+    "talent solutions",
+    "pautas comunitarias",
+    "empleo",
+    "marketing solutions",
+    "privacidad y condiciones",
+    "opciones de publicidad",
+    "publicidad",
+    "sales solutions",
+    "móvil",
+    "pequeñas empresas",
+    "centro de seguridad",
+    "linkedin corporation",
+    "¿tienes preguntas?",
+    "visita nuestro centro",
+    "gestiona tu cuenta",
+    "accede a tu configuración",
+    "transparencia de las recomendaciones",
+    "seleccionar idioma",
+)
+
+DETAIL_SKIP_EXACT = {
+    "christian enrique huicho prado",
+    "ingeniero de software | procesos de medios de pago y banca.",
+    "0 notificaciones",
+    "ir al contenido principal",
+    "inicio",
+    "mi red",
+    "empleos",
+    "mensajes",
+    "notificaciones",
+    "yo",
+    "para negocios",
+    "vuelve a probar premium",
+    "ver",
+    "mostrar credencial",
+    "no hay nada que ver por ahora",
+    "cuando añadas nuevos cursos, se mostrarán aquí.",
+    "añadir cursos",
+}
+
+
+def detail_body(lines: list[str], headings: set[str]) -> list[str]:
+    """Recorta una página de detalle LinkedIn y elimina navegación/footer."""
+    body: list[str] = []
+    started = False
+    for line in lines:
+        text = compact_text(line, max_len=260)
+        lower = text.lower()
+        if not text or is_linkedin_noise(text):
+            continue
+        if lower in headings:
+            started = True
+            continue
+        if not started:
+            continue
+        if lower in DETAIL_SKIP_EXACT or lower.isdigit():
+            continue
+        if any(lower.startswith(prefix) for prefix in DETAIL_STOP_PREFIXES):
+            break
+        body.append(text)
+    return clean_linkedin_lines(body)
+
+
+def split_tagged_linkedin_details(details_text: str) -> dict[str, list[str]]:
+    """Separa el texto `[linkedin:<section>]` generado por Playwright por página real."""
+    chunks: dict[str, list[str]] = {}
+    current_key = ""
+    for raw_line in str(details_text or "").splitlines():
+        line = compact_text(raw_line, max_len=260)
+        marker = DETAIL_SECTION_MARKER.match(line)
+        if marker:
+            current_key = marker.group("key").lower()
+            chunks.setdefault(current_key, [])
+            continue
+        if current_key and line:
+            chunks[current_key].append(line)
+    return chunks
+
+
+def is_cert_metadata(line: str) -> bool:
+    """Identifica líneas auxiliares de una certificación LinkedIn."""
+    lower = line.lower()
+    return lower.startswith(("expedición:", "id de la credencial:", "aptitudes:", "vencimiento:"))
+
+
+def format_cert_detail(line: str) -> str:
+    """Reduce metadatos largos de certificaciones a señales útiles."""
+    if line.lower().startswith("id de la credencial:"):
+        return ""
+    return compact_text(line.replace(" · ", " · "), max_len=120)
+
+
+def parse_linkedin_certifications(lines: list[str], *, limit: int) -> list[str]:
+    """Parsea certificaciones sin convertir el issuer en experiencia laboral."""
+    body = detail_body(lines, {"licencias y certificaciones", "licenses & certifications"})
+    items: list[str] = []
+    index = 0
+    while index < len(body) and len(items) < limit:
+        title = body[index]
+        if is_cert_metadata(title):
+            index += 1
+            continue
+        issuer = ""
+        index += 1
+        if index < len(body) and not is_cert_metadata(body[index]):
+            issuer = body[index]
+            index += 1
+
+        details: list[str] = []
+        while index < len(body) and (is_cert_metadata(body[index]) or body[index].lower() == "mostrar credencial"):
+            detail = format_cert_detail(body[index])
+            if detail:
+                details.append(detail)
+            index += 1
+
+        # La compañía emisora puede ser una señal académica, pero no la destacamos
+        # si parece marca laboral directa; así evitamos que el README parezca CV de experiencia.
+        if issuer and re.search(r"\bNTT\s*DATA\b", issuer, flags=re.IGNORECASE):
+            issuer = ""
+        parts = [part for part in [title, issuer, *details] if part]
+        item = compact_text(" · ".join(parts), max_len=280)
+        if item and item not in items:
+            items.append(item)
+    return items
+
+
+def looks_like_school_name(line: str) -> bool:
+    """Heurística pequeña para separar instituciones académicas en detalles LinkedIn."""
+    lower = line.lower()
+    school_markers = (
+        "universidad",
+        "university",
+        "cibertec",
+        "icpna",
+        "academy",
+        "institute",
+        "school",
+        "college",
+    )
+    return any(marker in lower for marker in school_markers)
+
+
+def parse_linkedin_education(lines: list[str], *, limit: int) -> list[str]:
+    """Parsea educación desde la página detail/education sin footer ni sugerencias."""
+    body = detail_body(lines, {"educación", "education"})
+    items: list[str] = []
+    current: list[str] = []
+    for line in body:
+        if looks_like_school_name(line) and current:
+            item = compact_text(" · ".join(current), max_len=240)
+            if item and item not in items:
+                items.append(item)
+            current = [line]
+        else:
+            current.append(line)
+        if len(items) >= limit:
+            break
+    if current and len(items) < limit:
+        item = compact_text(" · ".join(current), max_len=240)
+        if item and item not in items:
+            items.append(item)
+    return items[:limit]
+
+
+def extract_tagged_detail_sections(details_text: str, *, limit: int) -> dict[str, list[str]]:
+    """Extrae secciones de páginas `/details/*` con parsers específicos y menos ruido."""
+    chunks = split_tagged_linkedin_details(details_text)
+    sections: dict[str, list[str]] = {}
+
+    certifications = parse_linkedin_certifications(chunks.get("certifications", []), limit=limit)
+    if certifications:
+        sections["certifications"] = certifications
+
+    education = parse_linkedin_education(chunks.get("education", []), limit=limit)
+    if education:
+        sections["education"] = education
+
+    courses_body = detail_body(chunks.get("courses", []), {"cursos", "courses"})
+    if courses_body and not any("no hay nada que ver" in item.lower() for item in courses_body):
+        grouped = group_linkedin_section_lines("courses", courses_body, limit=limit)
+        if grouped:
+            sections["courses"] = grouped
+
+    projects_body = detail_body(chunks.get("projects", []), {"proyectos", "projects"})
+    if projects_body:
+        grouped = group_linkedin_section_lines("projects", projects_body, limit=limit)
+        if grouped:
+            sections["projects"] = grouped
+
+    return sections
+
+
 def linkedin_slug(url: str) -> str:
     """Extrae el slug `/in/<slug>/` usado por LinkedIn."""
     parsed = urllib.parse.urlparse(url)
@@ -878,14 +1095,8 @@ def normalize_linkedin_payload(payload: dict[str, Any], *, source: str, url: str
         if key == "publications" and not any(LINKEDIN_PUBLICATION_SIGNALS.search(value) for value in values):
             values = []
         sections[key] = values
-    raw_text = "\n".join(
-        str(part)
-        for part in (
-            payload.get("rawText") or payload.get("raw_text") or "",
-            payload.get("detailsRawText") or payload.get("details_raw_text") or "",
-        )
-        if part
-    )
+    raw_text = str(payload.get("rawText") or payload.get("raw_text") or "")
+    details_text = str(payload.get("detailsRawText") or payload.get("details_raw_text") or "")
     activity_text = payload.get("activityRawText") or payload.get("activity_raw_text") or ""
     if raw_text:
         lines = [compact_text(line, max_len=260) for line in str(raw_text).splitlines()]
@@ -898,16 +1109,22 @@ def normalize_linkedin_payload(payload: dict[str, Any], *, source: str, url: str
             for value in values:
                 if value not in sections[key] and len(sections[key]) < limit:
                     sections[key].append(value)
+    if details_text:
+        for key, values in extract_tagged_detail_sections(details_text, limit=limit).items():
+            # Las páginas `/details/*` son más confiables que el texto global porque
+            # vienen separadas por sección; reemplazan cualquier extracción genérica.
+            sections[key] = values
     sections = {key: values for key, values in sections.items() if values}
-    summary = compact_text(
+    summary = sanitize_linkedin_summary(
         payload.get("summary")
         or payload.get("about")
         or payload.get("description")
         or payload.get("metaDescription"),
-        max_len=360,
     )
     if not summary and raw_text:
-        summary = extract_linkedin_about([compact_text(line, max_len=260) for line in str(raw_text).splitlines() if line.strip()])
+        summary = sanitize_linkedin_summary(
+            extract_linkedin_about([compact_text(line, max_len=260) for line in str(raw_text).splitlines() if line.strip()])
+        )
     headline = sanitize_linkedin_headline(payload.get("headline") or payload.get("title"))
     posts = normalize_linkedin_text_list(payload.get("posts") or payload.get("activity"), limit=8)
     if activity_text:
