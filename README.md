@@ -40,6 +40,8 @@ Me gusta crear software que sea útil, verificable y fácil de mantener; especia
 - **Seguridad y datos / Security and data** — Análisis de vulnerabilidades, OCR para información sensible, CVE scoring y automatización defensiva.  
   <sub>Vulnerability analysis, sensitive-data OCR, CVE scoring and defensive automation.</sub>
 
+<!-- LinkedIn sync: sin datos renderizables; configurar LINKEDIN_COOKIE o LINKEDIN_PROFILE_JSON en GitHub Actions secrets. -->
+
 ## 🧰 Stack vivo / Live stack
 
 ![stack: IBM i](https://img.shields.io/badge/stack-IBM%20i-1f2937?style=for-the-badge)

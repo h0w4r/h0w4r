@@ -107,6 +107,10 @@
     "detector-informacion-sensible-azure-ocr",
     "web-client-C"
   ],
+  "linkedin": {
+    "url": "https://www.linkedin.com/in/cehp94/",
+    "sectionItemLimit": 4
+  },
   "activity": {
     "recentRepoLimit": 7,
     "recentEventLimit": 6,

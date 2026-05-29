@@ -10,8 +10,10 @@ from __future__ import annotations
 
 import argparse
 import difflib
+import html
 import json
 import os
+import re
 import sys
 import textwrap
 import time
@@ -49,6 +51,25 @@ REQUIRED_STRINGS = [
     "https://gravatar.com/ckirsch94",
     "Repos pineados recomendados",
 ]
+
+LINKEDIN_SECTION_ALIASES = {
+    "experience": ("Experiencia", "Experience"),
+    "projects": ("Proyectos", "Projects"),
+    "courses": ("Cursos", "Courses"),
+    "publications": ("Publicaciones", "Publications"),
+    "certifications": ("Licencias y certificaciones", "Licenses & certifications", "Certifications"),
+    "education": ("Educación", "Education"),
+}
+
+LINKEDIN_AUTHWALL_MARKERS = (
+    "join linkedin",
+    "agree & join linkedin",
+    "sign up | linkedin",
+    "authwall",
+    "login | linkedin",
+    "inicia sesión",
+    "únete a linkedin",
+)
 
 
 class FetchError(RuntimeError):
@@ -106,6 +127,40 @@ def request_json(
                 continue
             raise FetchError(f"{method} {url} falló: {exc}") from exc
     raise FetchError(f"{method} {url} falló tras {retries + 1} intentos")
+
+
+def request_text(url: str, *, headers: dict[str, str] | None = None, retries: int = 1) -> str:
+    """Hace una petición de texto/HTML con reintentos acotados.
+
+    Se usa para LinkedIn porque, cuando hay sesión, la respuesta esperada es HTML
+    y no JSON. Los headers sensibles se reciben desde secretos del workflow y no
+    se escriben en logs ni en el README.
+    """
+    request_headers = {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,text/plain;q=0.8,*/*;q=0.7",
+        "Accept-Language": "es-PE,es;q=0.9,en;q=0.8",
+        "Cache-Control": "no-cache",
+        "User-Agent": USER_AGENT,
+    }
+    if headers:
+        request_headers.update(headers)
+
+    for attempt in range(retries + 1):
+        req = urllib.request.Request(url, headers=request_headers)
+        try:
+            with urllib.request.urlopen(req, timeout=30) as response:
+                return response.read().decode("utf-8", errors="replace")
+        except urllib.error.HTTPError as exc:
+            if exc.code in {403, 429, 500, 502, 503, 504, 999} and attempt < retries:
+                time.sleep(1.5 * (attempt + 1))
+                continue
+            raise FetchError(f"GET {url} falló con HTTP {exc.code}") from exc
+        except urllib.error.URLError as exc:
+            if attempt < retries:
+                time.sleep(1.5 * (attempt + 1))
+                continue
+            raise FetchError(f"GET {url} falló: {exc}") from exc
+    raise FetchError(f"GET {url} falló tras {retries + 1} intentos")
 
 
 def github_get(path: str, token: str | None) -> Any:
@@ -185,6 +240,239 @@ def fetch_gravatar(slug: str) -> dict[str, Any]:
         return request_json(f"{GRAVATAR_API}/profiles/{urllib.parse.quote(slug)}")
     except FetchError as exc:
         return {"profile_url": f"https://gravatar.com/{slug}", "error": str(exc)}
+
+
+def normalize_linkedin_list(value: Any, *, limit: int) -> list[str]:
+    """Normaliza listas de LinkedIn desde JSON manual/exportado o extracción HTML."""
+    if not value:
+        return []
+    raw_items = value if isinstance(value, list) else [value]
+    items: list[str] = []
+    for item in raw_items:
+        if isinstance(item, str):
+            text = item
+        elif isinstance(item, dict):
+            title = item.get("title") or item.get("name") or item.get("role") or item.get("course")
+            organization = item.get("company") or item.get("organization") or item.get("issuer") or item.get("school")
+            period = item.get("period") or item.get("date") or item.get("dates")
+            description = item.get("description") or item.get("summary")
+            parts = [part for part in [title, organization, period, description] if part]
+            text = " · ".join(str(part) for part in parts)
+        else:
+            text = str(item)
+        text = compact_text(text)
+        if text and text not in items:
+            items.append(text)
+        if len(items) >= limit:
+            break
+    return items
+
+
+def compact_text(value: Any, *, max_len: int = 220) -> str:
+    """Compacta texto público para que el README no se convierta en pergamino medieval."""
+    text = html.unescape("" if value is None else str(value))
+    text = re.sub(r"\s+", " ", text).strip(" -·|•\t\r\n")
+    if len(text) <= max_len:
+        return text
+    return text[: max_len - 1].rstrip() + "…"
+
+
+def visible_text_from_html(raw_html: str) -> list[str]:
+    """Extrae líneas visibles de HTML de LinkedIn con filtros de ruido comunes."""
+    text = re.sub(r"(?is)<(script|style|noscript|svg|template).*?</\1>", " ", raw_html)
+    text = re.sub(r"(?is)<br\s*/?>", "\n", text)
+    text = re.sub(r"(?is)</(p|li|h[1-6]|div|section|span)>", "\n", text)
+    text = re.sub(r"(?is)<[^>]+>", " ", text)
+    text = html.unescape(text)
+    lines: list[str] = []
+    seen: set[str] = set()
+    noise = {
+        "linkedin",
+        "feed",
+        "jobs",
+        "messaging",
+        "notifications",
+        "home",
+        "skip to main content",
+        "agree & join linkedin",
+        "join linkedin",
+        "sign in",
+        "sign up",
+    }
+    for raw_line in text.splitlines():
+        line = compact_text(raw_line, max_len=260)
+        key = line.lower()
+        if len(line) < 3 or key in noise or key in seen:
+            continue
+        seen.add(key)
+        lines.append(line)
+    return lines
+
+
+def extract_meta_value(raw_html: str, *names: str) -> str:
+    """Lee meta tags básicos de una página HTML."""
+    for name in names:
+        patterns = [
+            rf'<meta[^>]+(?:name|property)=["\']{re.escape(name)}["\'][^>]+content=["\']([^"\']+)["\']',
+            rf'<meta[^>]+content=["\']([^"\']+)["\'][^>]+(?:name|property)=["\']{re.escape(name)}["\']',
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, raw_html, flags=re.IGNORECASE)
+            if match:
+                return compact_text(match.group(1), max_len=260)
+    return ""
+
+
+def extract_json_ld_person(raw_html: str) -> dict[str, Any]:
+    """Intenta leer datos Person en JSON-LD cuando LinkedIn los expone."""
+    for match in re.finditer(r'(?is)<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>', raw_html):
+        try:
+            payload = json.loads(html.unescape(match.group(1)).strip())
+        except json.JSONDecodeError:
+            continue
+        candidates = payload if isinstance(payload, list) else [payload]
+        for item in candidates:
+            if not isinstance(item, dict):
+                continue
+            item_type = item.get("@type")
+            if item_type == "Person" or (isinstance(item_type, list) and "Person" in item_type):
+                return item
+    return {}
+
+
+def extract_linkedin_sections(lines: list[str], *, limit: int) -> dict[str, list[str]]:
+    """Extrae secciones profesionales de texto visible usando encabezados ES/EN."""
+    alias_to_key = {
+        alias.lower(): key
+        for key, aliases in LINKEDIN_SECTION_ALIASES.items()
+        for alias in aliases
+    }
+    section_indexes: list[tuple[int, str]] = []
+    for index, line in enumerate(lines):
+        key = alias_to_key.get(line.strip().lower())
+        if key:
+            section_indexes.append((index, key))
+
+    sections: dict[str, list[str]] = {}
+    for pos, (start_index, key) in enumerate(section_indexes):
+        end_index = section_indexes[pos + 1][0] if pos + 1 < len(section_indexes) else min(len(lines), start_index + 28)
+        candidates: list[str] = []
+        for line in lines[start_index + 1 : end_index]:
+            lower_line = line.lower()
+            if lower_line in alias_to_key or "show all" in lower_line or "mostrar todo" in lower_line:
+                continue
+            if 3 <= len(line) <= 220 and line not in candidates:
+                candidates.append(line)
+            if len(candidates) >= limit:
+                break
+        if candidates:
+            sections[key] = candidates
+    return sections
+
+
+def normalize_linkedin_payload(payload: dict[str, Any], *, source: str, url: str, limit: int) -> dict[str, Any]:
+    """Normaliza una fuente estructurada de LinkedIn al contrato interno del README."""
+    sections: dict[str, list[str]] = {}
+    for key in LINKEDIN_SECTION_ALIASES:
+        sections[key] = normalize_linkedin_list(payload.get(key), limit=limit)
+    sections = {key: values for key, values in sections.items() if values}
+    summary = compact_text(payload.get("summary") or payload.get("about") or payload.get("description"), max_len=360)
+    headline = compact_text(payload.get("headline") or payload.get("title"), max_len=180)
+    return {
+        "available": bool(summary or headline or sections),
+        "source": source,
+        "url": payload.get("url") or url,
+        "headline": headline,
+        "summary": summary,
+        "sections": sections,
+        "reason": "" if (summary or headline or sections) else "sin datos profesionales estructurados",
+    }
+
+
+def parse_linkedin_html(raw_html: str, *, source: str, url: str, limit: int) -> dict[str, Any]:
+    """Convierte HTML de LinkedIn en un snapshot pequeño y publicable."""
+    lower = raw_html.lower()
+    if any(marker in lower for marker in LINKEDIN_AUTHWALL_MARKERS):
+        return {"available": False, "source": source, "url": url, "reason": "authwall o bloqueo de LinkedIn"}
+
+    person = extract_json_ld_person(raw_html)
+    lines = visible_text_from_html(raw_html)
+    sections = extract_linkedin_sections(lines, limit=limit)
+    summary = (
+        compact_text(person.get("description"), max_len=360)
+        or extract_meta_value(raw_html, "description", "og:description")
+    )
+    headline = compact_text(person.get("jobTitle"), max_len=180) or extract_meta_value(raw_html, "og:title", "title")
+    return {
+        "available": bool(summary or headline or sections),
+        "source": source,
+        "url": url,
+        "headline": headline,
+        "summary": summary,
+        "sections": sections,
+        "reason": "" if (summary or headline or sections) else "sin datos profesionales extraíbles",
+    }
+
+
+def fetch_linkedin(config: dict[str, Any]) -> dict[str, Any]:
+    """Lee LinkedIn con fallback seguro.
+
+    Orden de fuentes:
+    1. `LINKEDIN_PROFILE_JSON`: snapshot estructurado opcional para pruebas o emergencia.
+    2. `LINKEDIN_COOKIE`: sesión guardada como GitHub Actions secret para leer la página real.
+    3. Acceso público directo/proxy: normalmente LinkedIn responde authwall/999, pero se intenta.
+    """
+    profile = config["profile"]
+    linkedin_config = config.get("linkedin", {})
+    url = linkedin_config.get("url") or profile["links"]["linkedin"]
+    limit = int(linkedin_config.get("sectionItemLimit", 4))
+
+    secret_json = os.environ.get("LINKEDIN_PROFILE_JSON")
+    if secret_json:
+        try:
+            payload = json.loads(secret_json)
+            normalized = normalize_linkedin_payload(payload, source="LINKEDIN_PROFILE_JSON", url=url, limit=limit)
+            if normalized["available"]:
+                return normalized
+        except json.JSONDecodeError:
+            pass
+
+    attempts: list[str] = []
+    cookie = os.environ.get("LINKEDIN_COOKIE")
+    if cookie:
+        try:
+            raw_html = request_text(url, headers={"Cookie": cookie}, retries=1)
+            parsed = parse_linkedin_html(raw_html, source="LINKEDIN_COOKIE", url=url, limit=limit)
+            if parsed.get("available"):
+                return parsed
+            attempts.append(str(parsed.get("reason") or "cookie sin datos extraíbles"))
+        except FetchError as exc:
+            attempts.append(str(exc))
+    else:
+        attempts.append("LINKEDIN_COOKIE no configurado")
+
+    for source, candidate_url in (
+        ("linkedin_public", url),
+        ("jina_public_proxy", f"https://r.jina.ai/http://r.jina.ai/http://{url.replace('https://', 'http://')}"),
+    ):
+        try:
+            raw_html = request_text(candidate_url, retries=0)
+            parsed = parse_linkedin_html(raw_html, source=source, url=url, limit=limit)
+            if parsed.get("available"):
+                return parsed
+            attempts.append(f"{source}: {parsed.get('reason')}")
+        except FetchError as exc:
+            attempts.append(f"{source}: {exc}")
+
+    return {
+        "available": False,
+        "source": "unavailable",
+        "url": url,
+        "headline": "",
+        "summary": "",
+        "sections": {},
+        "reason": "; ".join(attempts[:3]),
+    }
 
 
 def repo_map(repos: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
@@ -385,6 +673,42 @@ def render_contributions(contrib: dict[str, Any]) -> str:
     return f"{contrib['total']} contribuciones registradas por GitHub en {contrib['year']}."
 
 
+def render_linkedin_snapshot(linkedin: dict[str, Any]) -> str:
+    """Renderiza un bloque profesional de LinkedIn si hay datos reales disponibles."""
+    if not linkedin.get("available"):
+        return (
+            "<!-- LinkedIn sync: sin datos renderizables; configurar LINKEDIN_COOKIE "
+            "o LINKEDIN_PROFILE_JSON en GitHub Actions secrets. -->"
+        )
+
+    labels = {
+        "experience": "Experiencia / Experience",
+        "projects": "Proyectos / Projects",
+        "courses": "Cursos / Courses",
+        "publications": "Publicaciones / Publications",
+        "certifications": "Certificaciones / Certifications",
+        "education": "Educación / Education",
+    }
+    lines = [
+        "## 🔗 Señales profesionales de LinkedIn / LinkedIn professional signals",
+        "",
+        f"Fuente sincronizada: [LinkedIn]({linkedin.get('url')}) · `{md_escape(linkedin.get('source'))}`.",
+    ]
+    if linkedin.get("headline"):
+        lines.extend(["", f"**Headline:** {md_escape(linkedin['headline'])}"])
+    if linkedin.get("summary"):
+        lines.extend(["", f"**Resumen / About:** {md_escape(linkedin['summary'])}"])
+
+    sections = linkedin.get("sections", {})
+    for key in ("experience", "projects", "courses", "publications", "certifications", "education"):
+        values = sections.get(key) or []
+        if not values:
+            continue
+        lines.extend(["", f"### {labels[key]}"])
+        lines.extend(f"- {md_escape(value)}" for value in values)
+    return "\n".join(lines)
+
+
 def render_readme(config: dict[str, Any], data: dict[str, Any]) -> str:
     """Construye el README completo en Markdown."""
     profile = config["profile"]
@@ -439,6 +763,7 @@ def render_readme(config: dict[str, Any], data: dict[str, Any]) -> str:
     recent_repos = render_recent_repos(config, repos)
     events = render_events(data["events"], int(config.get("activity", {}).get("recentEventLimit", 6)))
     contributions = render_contributions(data["contributions"])
+    linkedin = render_linkedin_snapshot(data["linkedin"])
     pinned = "\n".join(f"- `{repo}`" for repo in config["pinnedRecommendation"])
     ascii_card = """
 <pre>
@@ -477,6 +802,8 @@ Me gusta crear software que sea útil, verificable y fácil de mantener; especia
 ## 🧭 Qué estoy construyendo / What I build
 
 {chr(10).join(focus_lines)}
+
+{linkedin}
 
 ## 🧰 Stack vivo / Live stack
 
@@ -561,6 +888,7 @@ def collect_data(config: dict[str, Any]) -> dict[str, Any]:
         "events": events,
         "contributions": fetch_contributions(username, token),
         "gravatar": fetch_gravatar(config["profile"]["gravatarSlug"]),
+        "linkedin": fetch_linkedin(config),
     }
 
 

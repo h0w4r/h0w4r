@@ -37,11 +37,15 @@ jobs:
       - name: Generar README desde GitHub + Gravatar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LINKEDIN_COOKIE: ${{ secrets.LINKEDIN_COOKIE }}
+          LINKEDIN_PROFILE_JSON: ${{ secrets.LINKEDIN_PROFILE_JSON }}
         run: python scripts/build_profile.py --write
 
       - name: Validar README generado
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LINKEDIN_COOKIE: ${{ secrets.LINKEDIN_COOKIE }}
+          LINKEDIN_PROFILE_JSON: ${{ secrets.LINKEDIN_PROFILE_JSON }}
         run: python scripts/build_profile.py --check
 
       - name: Commit de cambios automáticos

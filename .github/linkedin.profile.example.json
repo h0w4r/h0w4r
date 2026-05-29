@@ -1,0 +1,21 @@
+{
+  "headline": "Software Engineer · IBM i/AS400 · Spring Boot · AI/Codex tooling",
+  "summary": "Resumen profesional breve tomado de LinkedIn.",
+  "experience": [
+    {
+      "title": "Software Engineer",
+      "company": "NTTDATA",
+      "period": "Actualidad",
+      "description": "Desarrollo backend, modernización IBM i/AS400 y automatización técnica."
+    }
+  ],
+  "projects": [
+    "MCP-IBMiDocs · documentación IBM i/AS400 consultable desde asistentes IA"
+  ],
+  "courses": [
+    "Curso o formación relevante visible en LinkedIn"
+  ],
+  "publications": [],
+  "certifications": [],
+  "education": []
+}
