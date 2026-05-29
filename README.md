@@ -86,10 +86,10 @@ Construyo herramientas para que entornos legacy, plataformas modernas y agentes 
 
 ### Eventos públicos recientes / Recent public events
 
-- 2026-05-29: Push/actualización en `h0w4r` · rama `main`
-- 2026-05-29: Creó branch `refactor/perfil-ecosistema-vivo` en `h0w4r`
 - 2026-05-26: Push/actualización en `MCP-IBMiDocs` · rama `main`
 - 2026-05-26: Push/actualización en `MCP-IBMiDocs` · rama `main`
+- 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main`
+- 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main`
 - 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main`
 - 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main`
 
