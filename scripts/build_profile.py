@@ -1212,7 +1212,6 @@ def render_readme(config: dict[str, Any], data: dict[str, Any]) -> str:
     contact_links = " · ".join(
         [
             f"[LinkedIn]({links['linkedin']})",
-            f"[Gravatar]({links['gravatar']})",
             f"[ORCID]({links['orcid']})",
             f"[GitHub]({links['github']})",
         ]

@@ -135,7 +135,7 @@ Ordenados por último commit/push público para que lo más fresco suba primero.
 
 ## 📬 Contacto / Contact
 
-[LinkedIn](https://www.linkedin.com/in/cehp94/) · [Gravatar](https://gravatar.com/ckirsch94) · [ORCID](https://orcid.org/0009-0009-2366-0494) · [GitHub](https://github.com/h0w4r)
+[LinkedIn](https://www.linkedin.com/in/cehp94/) · [ORCID](https://orcid.org/0009-0009-2366-0494) · [GitHub](https://github.com/h0w4r)
 
 <details>
 <summary>Repos pineados recomendados / Recommended pinned repositories</summary>
