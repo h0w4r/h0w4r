@@ -10,6 +10,7 @@ on:
       - main
     paths:
       - "scripts/build_profile.py"
+      - "scripts/fetch_linkedin_profile.mjs"
       - ".github/profile.config.json"
       - ".github/workflows/update-profile.yml"
 

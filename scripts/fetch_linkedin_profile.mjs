@@ -37,6 +37,18 @@ function compact(value, limit = 400) {
   return text.length > limit ? `${text.slice(0, limit - 1).trim()}…` : text;
 }
 
+function linkedinSlug(url) {
+  try {
+    return new URL(url).pathname.match(/\/in\/([^/]+)/)?.[1] || '';
+  } catch {
+    return '';
+  }
+}
+
+function safeError(error) {
+  return compact(error?.message || String(error), 500);
+}
+
 if (!cookieHeader) {
   console.log(JSON.stringify({ url: profileUrl, reason: 'LINKEDIN_COOKIE no configurado' }));
   process.exit(0);
@@ -57,18 +69,70 @@ try {
   });
   await context.addCookies(parseCookieHeader(cookieHeader));
   const page = await context.newPage();
-  await page.goto(profileUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-  await page.waitForTimeout(6000);
+  await page.route('**/*', async (route) => {
+    const resourceType = route.request().resourceType();
+    if (['image', 'media', 'font'].includes(resourceType)) {
+      await route.abort();
+      return;
+    }
+    await route.continue();
+  });
+
+  const slug = linkedinSlug(profileUrl);
+  const candidates = [
+    profileUrl,
+    profileUrl.replace(/\/$/, ''),
+    slug ? `https://www.linkedin.com/in/${slug}/?originalSubdomain=pe` : '',
+    slug ? `https://www.linkedin.com/in/${slug}/details/experience/` : '',
+    slug ? `https://www.linkedin.com/mwlite/in/${slug}` : '',
+  ].filter(Boolean);
+
+  const navigationErrors = [];
+  await page.goto('https://www.linkedin.com/feed/', { waitUntil: 'domcontentloaded', timeout: 45000 }).catch((error) => {
+    navigationErrors.push(`feed: ${safeError(error)}`);
+  });
+
+  let loaded = false;
+  for (const candidate of candidates) {
+    try {
+      await page.goto(candidate, { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await page.waitForTimeout(5000);
+      const bodyText = await page.locator('body').innerText({ timeout: 5000 }).catch(() => '');
+      if (bodyText && !/join linkedin|sign in|inicia sesión|authwall/i.test(bodyText)) {
+        loaded = true;
+        break;
+      }
+      navigationErrors.push(`${candidate}: página sin contenido autenticado útil`);
+    } catch (error) {
+      navigationErrors.push(`${candidate}: ${safeError(error)}`);
+    }
+  }
+
+  if (!loaded) {
+    console.log(
+      JSON.stringify({
+        url: profileUrl,
+        reason: `No se pudo abrir LinkedIn autenticado: ${navigationErrors.slice(0, 3).join(' | ')}`,
+      }),
+    );
+    process.exit(0);
+  }
 
   const snapshot = await page.evaluate(() => {
     const pick = (selector) => document.querySelector(selector)?.textContent?.trim() || '';
+    const pickFirst = (selectors) => selectors.map((selector) => pick(selector)).find(Boolean) || '';
     const meta = (selector) => document.querySelector(selector)?.getAttribute('content') || '';
     const bodyText = document.body?.innerText || '';
     const headings = Array.from(document.querySelectorAll('h1,h2,h3')).map((node) => node.textContent?.trim()).filter(Boolean);
     return {
       url: location.href,
       title: document.title || '',
-      headline: pick('h1') || headings[0] || '',
+      name: pickFirst(['main h1', 'h1']),
+      headline: pickFirst([
+        'main .text-body-medium.break-words',
+        'main .pv-text-details__left-panel .text-body-medium',
+        'section .text-body-medium.break-words',
+      ]),
       summary: meta('meta[name="description"]') || meta('meta[property="og:description"]') || '',
       metaDescription: meta('meta[name="description"]') || meta('meta[property="og:description"]') || '',
       headings,
@@ -77,6 +141,7 @@ try {
   });
 
   snapshot.title = compact(snapshot.title, 220);
+  snapshot.name = compact(snapshot.name, 160);
   snapshot.headline = compact(snapshot.headline, 220);
   snapshot.summary = compact(snapshot.summary, 600);
   snapshot.metaDescription = compact(snapshot.metaDescription, 600);
