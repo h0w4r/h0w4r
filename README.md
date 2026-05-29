@@ -40,7 +40,43 @@ Me gusta crear software que sea útil, verificable y fácil de mantener; especia
 - **Seguridad y datos / Security and data** — Análisis de vulnerabilidades, OCR para información sensible, CVE scoring y automatización defensiva.  
   <sub>Vulnerability analysis, sensitive-data OCR, CVE scoring and defensive automation.</sub>
 
-<!-- LinkedIn sync: sin datos renderizables; configurar LINKEDIN_COOKIE o LINKEDIN_PROFILE_JSON en GitHub Actions secrets. -->
+## 🔗 Señales profesionales de LinkedIn / LinkedIn professional signals
+
+Fuente sincronizada: [LinkedIn](https://www.linkedin.com/in/cehp94/) · `LINKEDIN_PROFILE_JSON_FILE`.
+
+**Headline:** 0 notificaciones
+
+**Resumen / About:** Soy un profesional en Computación e Informática, especializado en el desarrollo de software para servidores IBM i ( AS/400) y Linux. Tengo una sólida experiencia de 4+ años trabajando en proyectos de TI en el sector bancario, habiendo colaborado como desarrol…
+
+### Experiencia / Experience
+- Ingeniero de software
+- NTT DATA Europe & Latam · Jornada completa
+- oct. 2025 - actualidad · 8 meses
+- Lima, Perú · Híbrido
+
+### Proyectos / Projects
+- MCP "IBM i Docs"
+- may. 2026 – Actualidad
+- Proyecto open source para la comunidad IBM i / AS400.
+- El objetivo es reducir respuestas imprecisas o alucinadas cuando se trabaja con tecnologías IBM i, entregando contexto documental más confiable para desarrollo, diagnóstico y revisión técnica.
+
+### Publicaciones / Publications
+- Comentarios
+- Imágenes
+- Christian Enrique Huicho Prado
+- Ingeniero de Software \| Procesos de medios de pago y banca.
+
+### Certificaciones / Certifications
+- GitHub Copilot
+- Microsoft
+- Expedición: ene. 2026 · Vencimiento: ene. 2028
+- ID de la credencial: A4E3BB2DD462794C
+
+### Educación / Education
+- Universidad Peruana de Ciencias Aplicadas
+- Systems Engineering
+- CIBERTEC
+- Egresado , Computación e Informática
 
 ## 🧰 Stack vivo / Live stack
 
@@ -79,7 +115,7 @@ Me gusta crear software que sea útil, verificable y fácil de mantener; especia
 
 ## 📡 Actividad reciente / Recent activity
 
-**Resumen del año / Year snapshot:** 160 contribuciones registradas por GitHub en 2026.
+**Resumen del año / Year snapshot:** 161 contribuciones registradas por GitHub en 2026.
 
 ### 🔥 Repositorios activos / Active repositories
 
