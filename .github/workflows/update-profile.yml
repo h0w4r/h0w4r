@@ -11,8 +11,10 @@ on:
     paths:
       - "scripts/build_profile.py"
       - "scripts/fetch_linkedin_profile.mjs"
+      - ".github/linkedin.profile.example.json"
       - ".github/profile.config.json"
       - ".github/workflows/update-profile.yml"
+      - "AGENTS.md"
 
 permissions:
   contents: write

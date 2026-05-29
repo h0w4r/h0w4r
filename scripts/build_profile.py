@@ -989,9 +989,12 @@ def fetch_linkedin(config: dict[str, Any]) -> dict[str, Any]:
         except json.JSONDecodeError:
             attempts.append("LINKEDIN_PROFILE_JSON no es JSON válido")
 
+    reader_profile_url = f"https://r.jina.ai/{url}"
+    reader_activity_url = f"https://r.jina.ai/{url.rstrip('/')}/recent-activity/all/"
     for source, candidate_url in (
         ("linkedin_public", url),
-        ("jina_public_proxy", f"https://r.jina.ai/http://r.jina.ai/http://{url.replace('https://', 'http://')}"),
+        ("jina_public_profile", reader_profile_url),
+        ("jina_public_activity", reader_activity_url),
     ):
         try:
             raw_html = request_text(candidate_url, retries=0)
@@ -1017,6 +1020,7 @@ def linkedin_diagnostics(config: dict[str, Any]) -> dict[str, Any]:
     """Devuelve un diagnóstico seguro, sin imprimir cookies ni HTML privado."""
     linkedin = fetch_linkedin(config)
     sections = linkedin.get("sections", {}) or {}
+    publication_items = publication_items_from_linkedin(linkedin)
     return {
         "available": bool(linkedin.get("available")),
         "source": linkedin.get("source"),
@@ -1025,6 +1029,8 @@ def linkedin_diagnostics(config: dict[str, Any]) -> dict[str, Any]:
         "has_headline": bool(linkedin.get("headline")),
         "has_summary": bool(linkedin.get("summary")),
         "section_counts": {key: len(values) for key, values in sections.items()},
+        "publication_signal_count": len(publication_items),
+        "publication_insight_count": len(analyze_publication_items(publication_items)),
         "reason": "" if linkedin.get("available") else linkedin.get("reason", "sin detalle"),
     }
 

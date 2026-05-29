@@ -51,6 +51,7 @@ function safeError(error) {
 
 if (!cookieHeader) {
   console.log(JSON.stringify({ url: profileUrl, reason: 'LINKEDIN_COOKIE no configurado' }));
+  console.error('LinkedIn browser snapshot: LINKEDIN_COOKIE no configurado.');
   process.exit(0);
 }
 
@@ -109,10 +110,12 @@ try {
   }
 
   if (!loaded) {
+    const reason = `No se pudo abrir LinkedIn autenticado: ${navigationErrors.slice(0, 3).join(' | ')}`;
+    console.error(`LinkedIn browser snapshot: unavailable. ${reason}`);
     console.log(
       JSON.stringify({
         url: profileUrl,
-        reason: `No se pudo abrir LinkedIn autenticado: ${navigationErrors.slice(0, 3).join(' | ')}`,
+        reason,
       }),
     );
     process.exit(0);
@@ -158,6 +161,11 @@ try {
   snapshot.headline = compact(snapshot.headline, 220);
   snapshot.summary = compact(snapshot.summary, 600);
   snapshot.metaDescription = compact(snapshot.metaDescription, 600);
+  const lineCount = String(snapshot.rawText || '').split('\n').filter(Boolean).length;
+  const activityLineCount = String(snapshot.activityRawText || '').split('\n').filter(Boolean).length;
+  console.error(
+    `LinkedIn browser snapshot: available. profile_lines=${lineCount} activity_lines=${activityLineCount} url=${snapshot.url}`,
+  );
   console.log(JSON.stringify(snapshot));
 } finally {
   await browser.close();
