@@ -61,6 +61,8 @@ LINKEDIN_SECTION_ALIASES = {
     "education": ("Educación", "Education"),
 }
 
+LINKEDIN_ABOUT_ALIASES = ("Acerca de", "About")
+
 LINKEDIN_AUTHWALL_MARKERS = (
     "join linkedin",
     "agree & join linkedin",
@@ -89,7 +91,12 @@ def get_token() -> str | None:
 
 def linkedin_secret_configured() -> bool:
     """Indica si existe alguna fuente privada configurada para LinkedIn."""
-    return bool(os.environ.get("LINKEDIN_COOKIE") or os.environ.get("LINKEDIN_PROFILE_JSON"))
+    json_file = os.environ.get("LINKEDIN_PROFILE_JSON_FILE")
+    return bool(
+        os.environ.get("LINKEDIN_COOKIE")
+        or os.environ.get("LINKEDIN_PROFILE_JSON")
+        or (json_file and Path(json_file).exists())
+    )
 
 
 def request_json(
@@ -273,6 +280,20 @@ def normalize_linkedin_list(value: Any, *, limit: int) -> list[str]:
     return items
 
 
+def load_json_file(path_value: str | None) -> dict[str, Any] | None:
+    """Carga JSON desde archivo temporal si existe."""
+    if not path_value:
+        return None
+    path = Path(path_value)
+    if not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
 def compact_text(value: Any, *, max_len: int = 220) -> str:
     """Compacta texto público para que el README no se convierta en pergamino medieval."""
     text = html.unescape("" if value is None else str(value))
@@ -373,6 +394,34 @@ def extract_linkedin_sections(lines: list[str], *, limit: int) -> dict[str, list
         if candidates:
             sections[key] = candidates
     return sections
+
+
+def extract_linkedin_about(lines: list[str]) -> str:
+    """Extrae un resumen desde la sección Acerca de/About de LinkedIn."""
+    aliases = {alias.lower() for alias in LINKEDIN_ABOUT_ALIASES}
+    stop_aliases = {
+        alias.lower()
+        for aliases_for_section in LINKEDIN_SECTION_ALIASES.values()
+        for alias in aliases_for_section
+    }
+    stop_aliases.update({"activity", "actividad", "contacto", "contact", "featured", "destacado"})
+    for index, line in enumerate(lines):
+        if line.strip().lower() not in aliases:
+            continue
+        chunks: list[str] = []
+        for candidate in lines[index + 1 : index + 8]:
+            lower_candidate = candidate.strip().lower()
+            if lower_candidate in aliases or lower_candidate in stop_aliases:
+                break
+            if "show all" in lower_candidate or "mostrar todo" in lower_candidate:
+                continue
+            if len(candidate) >= 20:
+                chunks.append(candidate)
+            if chunks:
+                break
+        if chunks:
+            return compact_text(" ".join(chunks), max_len=360)
+    return ""
 
 
 def linkedin_slug(url: str) -> str:
@@ -597,8 +646,26 @@ def normalize_linkedin_payload(payload: dict[str, Any], *, source: str, url: str
     sections: dict[str, list[str]] = {}
     for key in LINKEDIN_SECTION_ALIASES:
         sections[key] = normalize_linkedin_list(payload.get(key), limit=limit)
+    raw_text = payload.get("rawText") or payload.get("raw_text") or ""
+    if raw_text:
+        lines = [compact_text(line, max_len=260) for line in str(raw_text).splitlines()]
+        lines = [line for line in lines if line]
+        extracted_sections = extract_linkedin_sections(lines, limit=limit)
+        for key, values in extracted_sections.items():
+            sections.setdefault(key, [])
+            for value in values:
+                if value not in sections[key] and len(sections[key]) < limit:
+                    sections[key].append(value)
     sections = {key: values for key, values in sections.items() if values}
-    summary = compact_text(payload.get("summary") or payload.get("about") or payload.get("description"), max_len=360)
+    summary = compact_text(
+        payload.get("summary")
+        or payload.get("about")
+        or payload.get("description")
+        or payload.get("metaDescription"),
+        max_len=360,
+    )
+    if not summary and raw_text:
+        summary = extract_linkedin_about([compact_text(line, max_len=260) for line in str(raw_text).splitlines() if line.strip()])
     headline = compact_text(payload.get("headline") or payload.get("title"), max_len=180)
     return {
         "available": bool(summary or headline or sections),
@@ -658,6 +725,12 @@ def fetch_linkedin(config: dict[str, Any]) -> dict[str, Any]:
                 return normalized
         except json.JSONDecodeError:
             pass
+
+    file_payload = load_json_file(os.environ.get("LINKEDIN_PROFILE_JSON_FILE"))
+    if file_payload:
+        normalized = normalize_linkedin_payload(file_payload, source="LINKEDIN_PROFILE_JSON_FILE", url=url, limit=limit)
+        if normalized["available"]:
+            return normalized
 
     attempts: list[str] = []
     cookie = os.environ.get("LINKEDIN_COOKIE")

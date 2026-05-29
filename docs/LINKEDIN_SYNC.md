@@ -55,6 +55,14 @@ https://www.linkedin.com/voyager/api/identity/profiles/cehp94/profileView
 
 Para eso deriva el header `Csrf-Token` desde `JSESSIONID`. Si tu cookie no incluye `JSESSIONID` y `li_at`, o si LinkedIn considera expirada la sesión, el diagnóstico fallará antes de regenerar el README.
 
+Además, el workflow crea un snapshot temporal con Playwright:
+
+```text
+scripts/fetch_linkedin_profile.mjs -> .linkedin-profile.json
+```
+
+Ese archivo no se commitea. Solo vive dentro del runner de Actions y se pasa al generador mediante `LINKEDIN_PROFILE_JSON_FILE`.
+
 También puedes diagnosticarlo localmente:
 
 ```powershell
