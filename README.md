@@ -48,30 +48,7 @@ Trabajo en la intersección entre sistemas empresariales, backends modernos y to
 
 <sub>I work at the intersection of enterprise systems, modern backends and AI-powered tooling. My focus is turning complex technical problems into tools other developers can use, review and maintain.</sub>
 
-**Foco actual / Current focus:** Software Engineer · IBM i/AS400 · Spring Boot · AI/Codex tooling
-
-**Perfil / Profile:** Soy un profesional en Computación e Informática, especializado en desarrollo de software para IBM i/AS400, Linux, backends modernos y tooling para desarrolladores.
-
-### Formación académica / Education
-- Universidad Peruana de Ciencias Aplicadas · Systems Engineering
-- CIBERTEC · Computación e Informática
-
-### Certificaciones / Certifications
-- GitHub Copilot · Microsoft
-
-### Proyectos profesionales / Professional projects
-- MCP "IBM i Docs" · Proyecto open source para la comunidad IBM i/AS400
-
-### Ideas que suelo compartir / What I usually share
-
-Además del código, uso mis publicaciones para ordenar aprendizajes, compartir avances y dejar señales técnicas útiles para otros devs.
-
-<sub>Beyond code, I use my posts to organize learnings, share progress and leave useful technical signals for other developers.</sub>
-
-- Mis publicaciones giran principalmente alrededor de tooling IA, MCP y Codex, IBM i/AS400, seguridad/datos y open source/documentación.
-- Comparto avances y aprendizajes alrededor de IBM i/AS400, MCPs y tooling para desarrollo asistido por IA.
-- Mis publicaciones tienden a convertir problemas técnicos en explicaciones reutilizables: contexto, decisión, implementación y siguiente mejora.
-- Me interesa visibilizar herramientas open source que reduzcan fricción real para otros desarrolladores, especialmente cuando conectan sistemas legacy con flujos modernos.
+**Perfil / Profile:** Inicia sesión en LinkedIn para estar en contacto con la gente que conoces, compartir ideas y avanzar profesionalmente.
 
 ## 🧰 Stack vivo / Live stack
 
@@ -128,7 +105,7 @@ Lo que más me representa ahora mismo: herramientas open source, integración co
 
 ## 📡 Actividad reciente / Recent activity
 
-**Resumen del año / Year snapshot:** 174 contribuciones registradas por GitHub en 2026.
+**Resumen del año / Year snapshot:** 176 contribuciones registradas por GitHub en 2026.
 
 ### 🔥 Repositorios activos / Active repositories
 
@@ -148,7 +125,7 @@ Mis repos más activos aparecen primero para que puedas ver rápido qué estoy e
 ### 🛰️ Eventos públicos recientes / Recent public events
 
 - 2026-05-26: Push/actualización en `MCP-IBMiDocs` · rama `main` · 2 eventos
-- 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main` · 4 eventos
+- 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main` · 2 eventos
 
 ---
 
