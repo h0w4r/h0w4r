@@ -831,32 +831,25 @@ def fetch_linkedin(config: dict[str, Any]) -> dict[str, Any]:
     """Lee LinkedIn con fallback seguro.
 
     Orden de fuentes:
-    1. `LINKEDIN_PROFILE_JSON`: snapshot estructurado opcional para pruebas o emergencia.
+    1. `LINKEDIN_PROFILE_JSON_FILE`: snapshot vivo extraído por Playwright en el workflow.
     2. `LINKEDIN_COOKIE`: sesión guardada como GitHub Actions secret para leer la página real.
-    3. Acceso público directo/proxy: normalmente LinkedIn responde authwall/999, pero se intenta.
+    3. `LINKEDIN_PROFILE_JSON`: snapshot estructurado de emergencia si LinkedIn bloquea al runner.
+    4. Acceso público directo/proxy: normalmente LinkedIn responde authwall/999, pero se intenta.
     """
     profile = config["profile"]
     linkedin_config = config.get("linkedin", {})
     url = linkedin_config.get("url") or profile["links"]["linkedin"]
     limit = int(linkedin_config.get("sectionItemLimit", 4))
 
-    secret_json = os.environ.get("LINKEDIN_PROFILE_JSON")
-    if secret_json:
-        try:
-            payload = json.loads(secret_json)
-            normalized = normalize_linkedin_payload(payload, source="LINKEDIN_PROFILE_JSON", url=url, limit=limit)
-            if normalized["available"]:
-                return normalized
-        except json.JSONDecodeError:
-            pass
+    attempts: list[str] = []
 
     file_payload = load_json_file(os.environ.get("LINKEDIN_PROFILE_JSON_FILE"))
     if file_payload:
         normalized = normalize_linkedin_payload(file_payload, source="LINKEDIN_PROFILE_JSON_FILE", url=url, limit=limit)
         if normalized["available"]:
             return normalized
+        attempts.append(f"browser_snapshot: {file_payload.get('reason') or normalized.get('reason')}")
 
-    attempts: list[str] = []
     cookie = os.environ.get("LINKEDIN_COOKIE")
     if cookie:
         try:
@@ -876,6 +869,17 @@ def fetch_linkedin(config: dict[str, Any]) -> dict[str, Any]:
             attempts.append(str(exc))
     else:
         attempts.append("LINKEDIN_COOKIE no configurado")
+
+    secret_json = os.environ.get("LINKEDIN_PROFILE_JSON")
+    if secret_json:
+        try:
+            payload = json.loads(secret_json)
+            normalized = normalize_linkedin_payload(payload, source="LINKEDIN_PROFILE_JSON", url=url, limit=limit)
+            if normalized["available"]:
+                return normalized
+            attempts.append(str(normalized.get("reason") or "LINKEDIN_PROFILE_JSON sin datos útiles"))
+        except json.JSONDecodeError:
+            attempts.append("LINKEDIN_PROFILE_JSON no es JSON válido")
 
     for source, candidate_url in (
         ("linkedin_public", url),
@@ -1147,7 +1151,7 @@ def render_linkedin_snapshot(linkedin: dict[str, Any]) -> str:
     lines = [
         "## 🔗 Señales profesionales de LinkedIn / LinkedIn professional signals",
         "",
-        f"Fuente sincronizada: [LinkedIn]({linkedin.get('url')}) · `{md_escape(linkedin.get('source'))}`.",
+        f"Fuente sincronizada: [LinkedIn]({linkedin.get('url')}) · actualización automática diaria.",
     ]
     if linkedin.get("headline"):
         lines.extend(["", f"**Headline:** {md_escape(linkedin['headline'])}"])

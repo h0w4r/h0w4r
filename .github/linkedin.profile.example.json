@@ -1,21 +1,19 @@
 {
   "headline": "Software Engineer · IBM i/AS400 · Spring Boot · AI/Codex tooling",
-  "summary": "Resumen profesional breve tomado de LinkedIn.",
+  "summary": "Soy un profesional en Computación e Informática, especializado en desarrollo de software para IBM i/AS400, Linux, backends modernos y tooling para desarrolladores.",
   "experience": [
-    {
-      "title": "Software Engineer",
-      "company": "NTTDATA",
-      "period": "Actualidad",
-      "description": "Desarrollo backend, modernización IBM i/AS400 y automatización técnica."
-    }
+    "Ingeniero de software · NTT DATA Europe & Latam · Jornada completa · Lima, Perú"
   ],
   "projects": [
-    "MCP-IBMiDocs · documentación IBM i/AS400 consultable desde asistentes IA"
+    "MCP \"IBM i Docs\" · Proyecto open source para la comunidad IBM i/AS400"
   ],
-  "courses": [
-    "Curso o formación relevante visible en LinkedIn"
-  ],
+  "courses": [],
   "publications": [],
-  "certifications": [],
-  "education": []
+  "certifications": [
+    "GitHub Copilot · Microsoft"
+  ],
+  "education": [
+    "Universidad Peruana de Ciencias Aplicadas · Systems Engineering",
+    "CIBERTEC · Computación e Informática"
+  ]
 }

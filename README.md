@@ -42,22 +42,24 @@ Me gusta crear software que sea útil, verificable y fácil de mantener; especia
 
 ## 🔗 Señales profesionales de LinkedIn / LinkedIn professional signals
 
-Fuente sincronizada: [LinkedIn](https://www.linkedin.com/in/cehp94/) · `LINKEDIN_PROFILE_JSON_FILE`.
+Fuente sincronizada: [LinkedIn](https://www.linkedin.com/in/cehp94/) · actualización automática diaria.
 
-**Resumen / About:** Soy un profesional en Computación e Informática, especializado en el desarrollo de software para servidores IBM i ( AS/400) y Linux. Tengo una sólida experiencia de 4+ años trabajando en proyectos de TI en el sector bancario, habiendo colaborado como desarrollador de software.
+**Headline:** Software Engineer · IBM i/AS400 · Spring Boot · AI/Codex tooling
+
+**Resumen / About:** Soy un profesional en Computación e Informática, especializado en el desarrollo de software para servidores IBM i (AS/400) y Linux. Tengo experiencia trabajando en proyectos de TI del sector bancario y creando tooling open source para desarrolladores.
 
 ### Experiencia / Experience
-- Ingeniero de software · NTT DATA Europe & Latam · Jornada completa · oct. 2025 - actualidad · 8 meses · Lima, Perú · Híbrido
+- Ingeniero de software · NTT DATA Europe & Latam · Jornada completa · oct. 2025 - actualidad · Lima, Perú · Híbrido
 
 ### Proyectos / Projects
-- MCP "IBM i Docs" · may. 2026 – Actualidad · Proyecto open source para la comunidad IBM i / AS400. · El objetivo es reducir respuestas imprecisas o alucinadas cuando se trabaja con tecnologías IBM i, entregando contexto documental más confiable para desarrollo, diagnóstico y revi…
+- MCP "IBM i Docs" · Proyecto open source para la comunidad IBM i/AS400 · contexto documental confiable para asistentes IA y tooling de desarrollo
 
 ### Certificaciones / Certifications
-- GitHub Copilot · Microsoft · Expedición: ene. 2026 · Vencimiento: ene. 2028 · ID de la credencial: A4E3BB2DD462794C
+- GitHub Copilot · Microsoft · Expedición: ene. 2026 · Vencimiento: ene. 2028
 
 ### Educación / Education
 - Universidad Peruana de Ciencias Aplicadas · Systems Engineering
-- CIBERTEC · Egresado , Computación e Informática
+- CIBERTEC · Egresado · Computación e Informática
 
 ## 🧰 Stack vivo / Live stack
 
@@ -96,7 +98,7 @@ Fuente sincronizada: [LinkedIn](https://www.linkedin.com/in/cehp94/) · `LINKEDI
 
 ## 📡 Actividad reciente / Recent activity
 
-**Resumen del año / Year snapshot:** 162 contribuciones registradas por GitHub en 2026.
+**Resumen del año / Year snapshot:** 163 contribuciones registradas por GitHub en 2026.
 
 ### 🔥 Repositorios activos / Active repositories
 
