@@ -17,7 +17,9 @@ param(
   [switch]$WriteReadme,
   [switch]$SkipPlaywrightInstall,
   [switch]$ForceCookie,
-  [switch]$KeepExistingProfileBrowsers
+  [switch]$KeepExistingProfileBrowsers,
+  [int]$MaxAttempts = 3,
+  [int]$RetryDelaySeconds = 8
 )
 
 Set-StrictMode -Version Latest
@@ -80,9 +82,29 @@ function Stop-ProfileBrowserProcesses {
 
   Write-Step "Cerrando navegadores previos del perfil dedicado ($($processes.Count))"
   foreach ($process in $processes) {
-    Stop-Process -Id $process.ProcessId -Force
+    try {
+      # Edge/Chrome puede cerrar procesos hijos entre la consulta WMI y Stop-Process.
+      # Si el PID ya murió, continuamos; si sigue vivo y no se puede cerrar, sí fallamos.
+      Stop-Process -Id $process.ProcessId -Force -ErrorAction Stop
+    } catch {
+      $stillRunning = Get-Process -Id $process.ProcessId -ErrorAction SilentlyContinue
+      if ($stillRunning) {
+        throw
+      }
+    }
   }
-  Start-Sleep -Seconds 2
+
+  $deadline = (Get-Date).AddSeconds(15)
+  do {
+    Start-Sleep -Milliseconds 500
+    $remaining = @(Get-CimInstance Win32_Process | Where-Object {
+        $_.CommandLine -and $_.CommandLine -match $escaped
+      })
+  } while ($remaining.Count -gt 0 -and (Get-Date) -lt $deadline)
+
+  if ($remaining.Count -gt 0) {
+    throw "No se pudo liberar el perfil dedicado: quedan $($remaining.Count) procesos del navegador activos."
+  }
 }
 
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
@@ -122,21 +144,47 @@ if ($usingPersistentSession) {
   throw "No encontré sesión LinkedIn. Ejecuta .\scripts\bootstrap_linkedin_session.ps1 o define `$env:LINKEDIN_COOKIE / $CookieFile como fallback."
 }
 
-Write-Step "Extrayendo snapshot LinkedIn vivo"
 $env:LINKEDIN_PROFILE_URL = "https://www.linkedin.com/in/cehp94/"
 $env:PLAYWRIGHT_CHROMIUM_CHANNEL = $BrowserChannel
 $env:LINKEDIN_HEADLESS = "true"
-node scripts/fetch_linkedin_profile.mjs > .linkedin-profile.json
-Assert-NativeSuccess "Extracción del snapshot LinkedIn"
 
-Assert-JsonFile ".linkedin-profile.json" "snapshot LinkedIn"
+$lastError = $null
+for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
+  try {
+    if ($attempt -gt 1 -and $usingPersistentSession) {
+      Stop-ProfileBrowserProcesses -ProfileDir $UserDataDir
+    }
 
-Write-Step "Diagnosticando snapshot sin fallback"
-$env:LINKEDIN_PROFILE_JSON_FILE = ".linkedin-profile.json"
-$env:LINKEDIN_SNAPSHOT_ONLY = "1"
-Remove-Item Env:\LINKEDIN_PROFILE_JSON -ErrorAction SilentlyContinue
-python scripts/build_profile.py --linkedin-diagnostics --require-linkedin-when-configured
-Assert-NativeSuccess "Diagnóstico LinkedIn"
+    Remove-Item ".linkedin-profile.json" -ErrorAction SilentlyContinue
+    Write-Step "Extrayendo snapshot LinkedIn vivo (intento $attempt/$MaxAttempts)"
+    node scripts/fetch_linkedin_profile.mjs > .linkedin-profile.json
+    Assert-NativeSuccess "Extracción del snapshot LinkedIn"
+
+    Assert-JsonFile ".linkedin-profile.json" "snapshot LinkedIn"
+
+    Write-Step "Diagnosticando snapshot sin fallback"
+    $env:LINKEDIN_PROFILE_JSON_FILE = ".linkedin-profile.json"
+    $env:LINKEDIN_SNAPSHOT_ONLY = "1"
+    Remove-Item Env:\LINKEDIN_PROFILE_JSON -ErrorAction SilentlyContinue
+    python scripts/build_profile.py --linkedin-diagnostics --require-linkedin-when-configured
+    Assert-NativeSuccess "Diagnóstico LinkedIn"
+    $lastError = $null
+    break
+  } catch {
+    $lastError = $_
+    Write-Warning "Intento LinkedIn $attempt/$MaxAttempts falló: $($_.Exception.Message)"
+    if ($usingPersistentSession) {
+      Stop-ProfileBrowserProcesses -ProfileDir $UserDataDir
+    }
+    if ($attempt -lt $MaxAttempts) {
+      Start-Sleep -Seconds $RetryDelaySeconds
+    }
+  }
+}
+
+if ($lastError) {
+  throw $lastError
+}
 
 if ($WriteReadme) {
   Write-Step "Regenerando README.md con snapshot local"

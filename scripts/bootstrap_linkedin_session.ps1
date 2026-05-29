@@ -81,9 +81,29 @@ function Stop-ProfileBrowserProcesses {
 
   Write-Step "Cerrando navegadores previos del perfil dedicado ($($processes.Count))"
   foreach ($process in $processes) {
-    Stop-Process -Id $process.ProcessId -Force
+    try {
+      # Edge/Chrome puede cerrar procesos hijos entre la consulta WMI y Stop-Process.
+      # Si el PID ya murió, continuamos; si sigue vivo y no se puede cerrar, sí fallamos.
+      Stop-Process -Id $process.ProcessId -Force -ErrorAction Stop
+    } catch {
+      $stillRunning = Get-Process -Id $process.ProcessId -ErrorAction SilentlyContinue
+      if ($stillRunning) {
+        throw
+      }
+    }
   }
-  Start-Sleep -Seconds 2
+
+  $deadline = (Get-Date).AddSeconds(15)
+  do {
+    Start-Sleep -Milliseconds 500
+    $remaining = @(Get-CimInstance Win32_Process | Where-Object {
+        $_.CommandLine -and $_.CommandLine -match $escaped
+      })
+  } while ($remaining.Count -gt 0 -and (Get-Date) -lt $deadline)
+
+  if ($remaining.Count -gt 0) {
+    throw "No se pudo liberar el perfil dedicado: quedan $($remaining.Count) procesos del navegador activos."
+  }
 }
 
 function Backup-ExistingProfile {
