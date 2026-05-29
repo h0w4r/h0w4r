@@ -320,20 +320,30 @@ def summarize_event(event: dict[str, Any]) -> str:
     return f"{event_type.replace('Event', '')} en `{repo}`"
 
 
+def repo_freshness_key(repo: dict[str, Any]) -> str:
+    """Clave de orden para priorizar repos por actividad real de commits/pushes recientes."""
+    return repo.get("pushed_at") or repo.get("updated_at") or ""
+
+
 def render_featured_table(config: dict[str, Any], repos_by_name: dict[str, dict[str, Any]]) -> str:
-    """Renderiza los proyectos destacados con metadatos vivos de GitHub."""
+    """Renderiza los proyectos destacados priorizando los que tienen commits/pushes recientes."""
     username = config["profile"]["username"]
+    featured_items = sorted(
+        enumerate(config["featuredRepositories"]),
+        key=lambda pair: (repo_freshness_key(repos_by_name.get(pair[1]["name"], {})), -pair[0]),
+        reverse=True,
+    )
     rows = [
-        "| Proyecto / Project | Foco / Focus | Impacto / Impact | Señal viva / Live signal |",
+        "| Proyecto / Project | Foco / Focus | Impacto / Impact | Actividad / Activity |",
         "|---|---|---|---|",
     ]
-    for item in config["featuredRepositories"]:
+    for _, item in featured_items:
         name = item["name"]
         repo = repos_by_name.get(name, {})
         lang = repo.get("language") or "multi-stack"
         stars = repo.get("stargazers_count", 0)
         pushed = format_date(repo.get("pushed_at"))
-        signal = f"{lang} · ⭐ {stars} · push {pushed}"
+        signal = f"{lang} · ⭐ {stars} · último push {pushed}"
         focus = f"{item['taglineEs']}<br/><sub>{item['taglineEn']}</sub>"
         impact = f"{item['impactEs']}<br/><sub>{item['impactEn']}</sub>"
         rows.append(
@@ -347,8 +357,8 @@ def render_recent_repos(config: dict[str, Any], repos: list[dict[str, Any]]) -> 
     username = config["profile"]["username"]
     limit = int(config.get("activity", {}).get("recentRepoLimit", 7))
     active = [repo for repo in repos if not repo.get("archived") and repo["name"] != username]
-    active.sort(key=lambda repo: repo.get("pushed_at") or repo.get("updated_at") or "", reverse=True)
-    rows = ["| Repo | Stack | Último push | Descripción |", "|---|---|---:|---|"]
+    active.sort(key=repo_freshness_key, reverse=True)
+    rows = ["| Repo | Stack | Último commit/push | Descripción |", "|---|---|---:|---|"]
     for repo in active[:limit]:
         description = repo.get("description") or "Proyecto público en evolución."
         rows.append(
@@ -430,6 +440,14 @@ def render_readme(config: dict[str, Any], data: dict[str, Any]) -> str:
     events = render_events(data["events"], int(config.get("activity", {}).get("recentEventLimit", 6)))
     contributions = render_contributions(data["contributions"])
     pinned = "\n".join(f"- `{repo}`" for repo in config["pinnedRecommendation"])
+    ascii_card = """
+<pre>
++-- h0w4r.dev -----------------------------------------------+
+| IBM i/AS400 <-> Spring Boot <-> AI/Codex tooling           |
+| open source | automation | security-minded engineering      |
++------------------------------------------------------------+
+</pre>
+""".strip()
 
     markdown = f"""
 <!-- Perfil generado automáticamente por scripts/build_profile.py. -->
@@ -437,7 +455,7 @@ def render_readme(config: dict[str, Any], data: dict[str, Any]) -> str:
 
 <a href="{links['gravatar']}"><img align="right" width="130" src="{avatar_url}" alt="Chris Kirsch" /></a>
 
-### Chris Kirsch · h0w4r
+### 👋 Chris Kirsch · h0w4r
 
 **{profile['headlineEs']}**  
 <sub>**{profile['headlineEn']}**</sub>
@@ -452,13 +470,15 @@ Me gusta crear software que sea útil, verificable y fácil de mantener; especia
 
 <br clear="right" />
 
+{ascii_card}
+
 ---
 
-## Qué estoy construyendo / What I build
+## 🧭 Qué estoy construyendo / What I build
 
 {chr(10).join(focus_lines)}
 
-## Stack vivo / Live stack
+## 🧰 Stack vivo / Live stack
 
 {stack_badges}
 
@@ -466,34 +486,37 @@ Me gusta crear software que sea útil, verificable y fácil de mantener; especia
 
 ---
 
-## Ecosistema vivo / Live ecosystem
+## 🚀 Ecosistema vivo / Live ecosystem
 
 {featured}
 
 ---
 
-## Actividad reciente / Recent activity
+## 📡 Actividad reciente / Recent activity
 
 **Resumen del año / Year snapshot:** {contributions}
 
-### Repositorios activos / Active repositories
+### 🔥 Repositorios activos / Active repositories
+
+Ordenados por último commit/push público para que lo más fresco suba primero.<br/>
+<sub>Sorted by latest public commit/push so the freshest work floats to the top.</sub>
 
 {recent_repos}
 
-### Eventos públicos recientes / Recent public events
+### 🛰️ Eventos públicos recientes / Recent public events
 
 {events}
 
 ---
 
-## Cómo puedo aportar / How I can help
+## 🤝 Cómo puedo aportar / How I can help
 
 - **Dónde suelo aportar más valor:** modernización IBM i/AS400, tooling para desarrolladores, automatización con IA, backends Java/Spring y validación técnica reproducible.
 - **Where I usually add the most value:** IBM i/AS400 modernization, developer tooling, AI-assisted automation, Java/Spring backends and reproducible technical validation.
 - **Cómo trabajo:** me gustan los commits pequeños, la documentación clara, las pruebas que demuestran algo y las herramientas que eliminan fricción real.
 - **How I work:** I like small commits, clear documentation, tests that actually prove something and tools that remove real friction.
 
-## Contacto / Contact
+## 📬 Contacto / Contact
 
 {contact_links}
 
