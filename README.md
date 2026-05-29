@@ -103,7 +103,7 @@ Lo que más me representa ahora mismo: herramientas open source, integración co
 
 ## 📡 Actividad reciente / Recent activity
 
-**Resumen del año / Year snapshot:** 177 contribuciones registradas por GitHub en 2026.
+**Resumen del año / Year snapshot:** 178 contribuciones registradas por GitHub en 2026.
 
 ### 🔥 Repositorios activos / Active repositories
 
@@ -123,7 +123,6 @@ Mis repos más activos aparecen primero para que puedas ver rápido qué estoy e
 ### 🛰️ Eventos públicos recientes / Recent public events
 
 - 2026-05-26: Push/actualización en `MCP-IBMiDocs` · rama `main` · 2 eventos
-- 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main`
 
 ---
 
