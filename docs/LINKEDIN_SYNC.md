@@ -30,6 +30,31 @@ Y valida el último run:
 gh run list --repo h0w4r/h0w4r --workflow update-profile.yml --limit 3
 ```
 
+El workflow ejecuta primero:
+
+```bash
+python scripts/build_profile.py --linkedin-diagnostics --require-linkedin-when-configured
+```
+
+Eso no imprime la cookie. Solo muestra un JSON seguro con:
+
+- `available`
+- `source`
+- `secret_configured`
+- `has_headline`
+- `has_summary`
+- conteo de secciones extraídas
+
+Si `LINKEDIN_COOKIE` o `LINKEDIN_PROFILE_JSON` existe pero no permite extraer datos profesionales, el workflow falla para que el problema sea visible en Actions en vez de publicar un README incompleto en silencio.
+
+También puedes diagnosticarlo localmente:
+
+```powershell
+$env:LINKEDIN_COOKIE = '<pegar cookie solo en tu terminal local>'
+python scripts/build_profile.py --linkedin-diagnostics --require-linkedin-when-configured
+Remove-Item Env:\LINKEDIN_COOKIE
+```
+
 ## Opción fallback: `LINKEDIN_PROFILE_JSON`
 
 Si LinkedIn cambia el HTML o la cookie no permite extraer secciones limpias, se puede usar un JSON estructurado como secret:

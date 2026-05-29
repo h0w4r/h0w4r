@@ -87,6 +87,11 @@ def get_token() -> str | None:
     return os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
 
 
+def linkedin_secret_configured() -> bool:
+    """Indica si existe alguna fuente privada configurada para LinkedIn."""
+    return bool(os.environ.get("LINKEDIN_COOKIE") or os.environ.get("LINKEDIN_PROFILE_JSON"))
+
+
 def request_json(
     url: str,
     *,
@@ -473,6 +478,35 @@ def fetch_linkedin(config: dict[str, Any]) -> dict[str, Any]:
         "sections": {},
         "reason": "; ".join(attempts[:3]),
     }
+
+
+def linkedin_diagnostics(config: dict[str, Any]) -> dict[str, Any]:
+    """Devuelve un diagnóstico seguro, sin imprimir cookies ni HTML privado."""
+    linkedin = fetch_linkedin(config)
+    sections = linkedin.get("sections", {}) or {}
+    return {
+        "available": bool(linkedin.get("available")),
+        "source": linkedin.get("source"),
+        "url": linkedin.get("url"),
+        "secret_configured": linkedin_secret_configured(),
+        "has_headline": bool(linkedin.get("headline")),
+        "has_summary": bool(linkedin.get("summary")),
+        "section_counts": {key: len(values) for key, values in sections.items()},
+        "reason": "" if linkedin.get("available") else linkedin.get("reason", "sin detalle"),
+    }
+
+
+def print_linkedin_diagnostics(config: dict[str, Any], *, require_when_configured: bool) -> int:
+    """Imprime diagnóstico de LinkedIn y falla solo si un secreto configurado no funciona."""
+    diagnostics = linkedin_diagnostics(config)
+    print(json.dumps(diagnostics, ensure_ascii=False, indent=2))
+    if require_when_configured and diagnostics["secret_configured"] and not diagnostics["available"]:
+        print(
+            "ERROR: hay secreto de LinkedIn configurado, pero no se extrajeron datos profesionales.",
+            file=sys.stderr,
+        )
+        return 1
+    return 0
 
 
 def repo_map(repos: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
@@ -939,12 +973,22 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Genera el README vivo del perfil h0w4r.")
     parser.add_argument("--write", action="store_true", help="Escribe README.md con el contenido generado.")
     parser.add_argument("--check", action="store_true", help="Valida que README.md esté sincronizado.")
+    parser.add_argument("--linkedin-diagnostics", action="store_true", help="Diagnostica la fuente LinkedIn sin mostrar secretos.")
+    parser.add_argument(
+        "--require-linkedin-when-configured",
+        action="store_true",
+        help="Falla si LINKEDIN_COOKIE/LINKEDIN_PROFILE_JSON existe pero no entrega datos útiles.",
+    )
     args = parser.parse_args(argv)
 
-    if not args.write and not args.check:
-        parser.error("usa --write, --check o ambos")
-
     config = load_config()
+
+    if args.linkedin_diagnostics:
+        return print_linkedin_diagnostics(config, require_when_configured=args.require_linkedin_when_configured)
+
+    if not args.write and not args.check:
+        parser.error("usa --write, --check o --linkedin-diagnostics")
+
     content = render_readme(config, collect_data(config))
     validation_errors = validate_content(content)
     if validation_errors:

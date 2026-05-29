@@ -34,6 +34,12 @@ jobs:
         with:
           python-version: "3.x"
 
+      - name: Diagnosticar fuente LinkedIn
+        env:
+          LINKEDIN_COOKIE: ${{ secrets.LINKEDIN_COOKIE }}
+          LINKEDIN_PROFILE_JSON: ${{ secrets.LINKEDIN_PROFILE_JSON }}
+        run: python scripts/build_profile.py --linkedin-diagnostics --require-linkedin-when-configured
+
       - name: Generar README desde GitHub + Gravatar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
