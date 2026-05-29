@@ -73,6 +73,14 @@ LINKEDIN_AUTHWALL_MARKERS = (
     "únete a linkedin",
 )
 
+LINKEDIN_AUTH_URL_MARKERS = (
+    "/uas/login",
+    "/login",
+    "/checkpoint",
+    "/authwall",
+    "session_redirect",
+)
+
 LINKEDIN_UI_NOISE_EXACT = {
     "0 notificaciones",
     "notificaciones",
@@ -141,6 +149,10 @@ LINKEDIN_README_NOISE_PATTERNS = (
     "Join LinkedIn",
     "Agree & Join LinkedIn",
     "Sign in to view",
+    "Inicia sesión en LinkedIn",
+    "Registrarse | LinkedIn",
+    "session_redirect",
+    "página sin contenido autenticado",
     "authwall",
     "\n- Comentarios\n",
     "\n- Imágenes\n",
@@ -852,6 +864,10 @@ def fetch_linkedin_voyager(url: str, cookie: str, *, limit: int) -> dict[str, An
 
 def normalize_linkedin_payload(payload: dict[str, Any], *, source: str, url: str, limit: int) -> dict[str, Any]:
     """Normaliza una fuente estructurada de LinkedIn al contrato interno del README."""
+    payload_url = str(payload.get("url") or "")
+    if any(marker in payload_url.lower() for marker in LINKEDIN_AUTH_URL_MARKERS):
+        return {"available": False, "source": source, "url": url, "reason": "snapshot apunta a login/checkpoint de LinkedIn"}
+
     sections: dict[str, list[str]] = {}
     for key in LINKEDIN_SECTION_ALIASES:
         if key == "experience":
@@ -1640,6 +1656,8 @@ def check_readme(content: str) -> int:
     """Comprueba que README.md está sincronizado con la salida generada."""
     current = README_PATH.read_text(encoding="utf-8") if README_PATH.exists() else ""
     errors = validate_content(content)
+    current_errors = validate_content(current)
+    errors.extend(f"README actual: {error}" for error in current_errors)
     if current != content:
         diff = difflib.unified_diff(
             current.splitlines(),

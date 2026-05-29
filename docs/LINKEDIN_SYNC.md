@@ -55,6 +55,16 @@ Para dejarlo resistente a reinicios, conviene instalarlo como servicio con `svc.
 
 ## Crear o renovar la sesión local de LinkedIn
 
+
+Por defecto el flujo usa **Microsoft Edge** (`msedge`), porque es el navegador principal del host. Si algún día quieres forzar Chrome:
+
+```powershell
+.\scripts\bootstrap_linkedin_session.ps1 -BrowserChannel chrome
+.\scripts\test_linkedin_sync_ready.ps1 -LiveProbe -BrowserChannel chrome
+```
+
+Regla simple: la sesión válida es la de la ventana que abre `bootstrap_linkedin_session.ps1` con el perfil dedicado. Abrir Edge/Chrome normal y pegar el link no alimenta al workflow; eso queda en otro perfil y Playwright ni se entera. Cruel, pero justo.
+
 En la misma máquina y con el mismo usuario que ejecutará el runner:
 
 ```powershell
@@ -64,7 +74,7 @@ En la misma máquina y con el mismo usuario que ejecutará el runner:
 Qué hace:
 
 1. Instala el cliente Playwright sin descargar navegador.
-2. Abre Chrome con un perfil dedicado en `%LOCALAPPDATA%\h0w4r-linkedin-sync\browser-profile`.
+2. Abre Edge —o el canal configurado— con un perfil dedicado en `%LOCALAPPDATA%\h0w4r-linkedin-sync\browser-profile`.
 3. Te deja iniciar sesión manualmente en LinkedIn.
 4. Extrae `.linkedin-profile.json`.
 5. Ejecuta el diagnóstico con `LINKEDIN_SNAPSHOT_ONLY=1`.
@@ -143,7 +153,7 @@ Remove-Item Env:\LINKEDIN_COOKIE
 El workflow self-hosted corre todos los días a las **06:22 de Lima** (`11:22 UTC`). Pasos principales:
 
 1. Valida que exista el perfil local de LinkedIn.
-2. Instala solo el cliente Playwright y usa Chrome local del runner.
+2. Instala solo el cliente Playwright y usa Edge local del runner (`msedge`).
 3. Extrae `.linkedin-profile.json` desde la sesión persistente.
 4. Ejecuta diagnóstico sin fallback (`LINKEDIN_SNAPSHOT_ONLY=1`).
 5. Genera y valida `README.md`.

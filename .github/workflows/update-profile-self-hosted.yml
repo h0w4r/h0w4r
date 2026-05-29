@@ -46,15 +46,16 @@ jobs:
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
         run: |
-          # El runner Windows ya tiene Chrome/Edge. Descargar Chromium en cada run
-          # hace el sync lento y puede dejar jobs colgados por red; usamos Chrome local.
+          # El runner Windows ya tiene Edge/Chrome. Descargar Chromium en cada run
+          # hace el sync lento y puede dejar jobs colgados por red; usamos Edge local.
           npm install --no-save --ignore-scripts playwright@1.56.1
 
       - name: Extraer snapshot LinkedIn desde sesión local
         shell: pwsh
         env:
           LINKEDIN_PROFILE_URL: "https://www.linkedin.com/in/cehp94/"
-          PLAYWRIGHT_CHROMIUM_CHANNEL: "chrome"
+          LINKEDIN_BROWSER_CHANNEL: "msedge"
+          PLAYWRIGHT_CHROMIUM_CHANNEL: "msedge"
           LINKEDIN_HEADLESS: "true"
         run: |
           $env:LINKEDIN_USER_DATA_DIR = Join-Path $env:LOCALAPPDATA 'h0w4r-linkedin-sync\browser-profile'

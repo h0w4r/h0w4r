@@ -13,6 +13,8 @@ param(
   [string]$RunnerLabel = "linkedin-sync",
   [string]$WorkflowFile = "update-profile-self-hosted.yml",
   [string]$UserDataDir = (Join-Path $env:LOCALAPPDATA "h0w4r-linkedin-sync\browser-profile"),
+  [ValidateSet("msedge", "chrome", "chromium", "bundled")]
+  [string]$BrowserChannel = $(if ($env:LINKEDIN_BROWSER_CHANNEL) { $env:LINKEDIN_BROWSER_CHANNEL } else { "msedge" }),
   [switch]$LiveProbe,
   [switch]$DispatchWorkflow
 )
@@ -44,6 +46,7 @@ $failures = New-Object System.Collections.Generic.List[string]
 Write-Host "==> Auditoría del sync LinkedIn" -ForegroundColor Cyan
 Write-Host "Repo local: $RepoRoot"
 Write-Host "Perfil LinkedIn local: $UserDataDir"
+Write-Host "Canal navegador: $BrowserChannel"
 
 $insideGit = $false
 try { $insideGit = ((git rev-parse --is-inside-work-tree) -eq "true") } catch { $insideGit = $false }
@@ -61,12 +64,21 @@ $workflowExists = Test-Path $workflowPath
 Write-Check "Workflow self-hosted" $workflowExists $workflowPath
 if (-not $workflowExists) { $failures.Add("No existe $workflowPath") }
 
-$chromeCandidates = @(
-  "C:\Program Files\Google\Chrome\Application\chrome.exe",
-  "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
-  "C:\Program Files\Microsoft\Edge\Application\msedge.exe",
-  "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-)
+$chromeCandidates = if ($BrowserChannel -eq "msedge") {
+  @(
+    "C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+    "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+    "C:\Program Files\Google\Chrome\Application\chrome.exe",
+    "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+  )
+} else {
+  @(
+    "C:\Program Files\Google\Chrome\Application\chrome.exe",
+    "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+    "C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+    "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+  )
+}
 $browser = $chromeCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
 Write-Check "Navegador local" ([bool]$browser) ($browser ?? "Chrome/Edge no encontrado")
 if (-not $browser) { $failures.Add("No encontré Chrome/Edge local para Playwright.") }
@@ -104,7 +116,7 @@ if ($LiveProbe) {
     $failures.Add("No se ejecutó prueba viva porque falta sesión local.")
   } else {
     Write-Host "==> Ejecutando prueba viva con scripts/sync_linkedin_self_hosted.ps1" -ForegroundColor Cyan
-    & .\scripts\sync_linkedin_self_hosted.ps1 -SkipPlaywrightInstall
+    & .\scripts\sync_linkedin_self_hosted.ps1 -SkipPlaywrightInstall -BrowserChannel $BrowserChannel
     if ($LASTEXITCODE -ne 0) {
       Write-Check "Prueba viva LinkedIn" $false "exit=$LASTEXITCODE"
       $failures.Add("La prueba viva de LinkedIn falló.")

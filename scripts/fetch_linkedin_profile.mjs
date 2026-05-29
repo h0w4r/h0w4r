@@ -21,13 +21,15 @@ const userDataDir = process.env.LINKEDIN_USER_DATA_DIR || '';
 const storageStateFile = process.env.LINKEDIN_STORAGE_STATE_FILE || '';
 const interactiveLogin = truthy(process.env.LINKEDIN_INTERACTIVE_LOGIN);
 const headless = process.env.LINKEDIN_HEADLESS ? truthy(process.env.LINKEDIN_HEADLESS) : true;
-const requestedChannel = process.env.PLAYWRIGHT_CHROMIUM_CHANNEL || 'chrome';
+const requestedChannel = process.env.LINKEDIN_BROWSER_CHANNEL || process.env.PLAYWRIGHT_CHROMIUM_CHANNEL || 'msedge';
 const applyCookie = process.env.LINKEDIN_APPLY_COOKIE
   ? truthy(process.env.LINKEDIN_APPLY_COOKIE)
   : !userDataDir && !storageStateFile;
 
-const AUTHWALL_PATTERN = /join linkedin|agree & join linkedin|sign up \| linkedin|authwall|login \| linkedin|inicia sesi[oó]n|únete a linkedin|sign in/i;
+const AUTHWALL_PATTERN =
+  /join linkedin|join now|agree & join linkedin|sign up \| linkedin|authwall|login \| linkedin|inicia sesi[oó]n|únete a linkedin|sign in|sign in to linkedin|email or phone|forgot password|keep me logged in|new to linkedin/i;
 const CHECKPOINT_PATTERN = /checkpoint|challenge|captcha|verification|verificaci[oó]n|security check|control de seguridad/i;
+const AUTH_URL_PATTERN = /\/uas\/login|\/login|\/checkpoint|\/authwall|session_redirect|trk=guest_homepage/i;
 
 function truthy(value) {
   return /^(1|true|yes|y|on|si|sí)$/i.test(String(value || '').trim());
@@ -156,8 +158,8 @@ async function bodyText(page) {
     .catch(() => '');
 }
 
-function authenticatedText(text) {
-  return Boolean(text && !AUTHWALL_PATTERN.test(text) && !CHECKPOINT_PATTERN.test(text));
+function authenticatedPage(url, text) {
+  return Boolean(text && !AUTH_URL_PATTERN.test(url || '') && !AUTHWALL_PATTERN.test(text) && !CHECKPOINT_PATTERN.test(text));
 }
 
 async function pageDiagnostics(page) {
@@ -172,6 +174,7 @@ async function pageDiagnostics(page) {
   return {
     finalUrl: compact(page.url(), 240),
     title: compact(await page.title().catch(() => ''), 180),
+    authUrlDetected: AUTH_URL_PATTERN.test(page.url()),
     authwallDetected: AUTHWALL_PATTERN.test(text),
     checkpointDetected: CHECKPOINT_PATTERN.test(text),
     bodyLineCount: text.split(/\r?\n/).filter((line) => line.trim()).length,
@@ -213,7 +216,7 @@ async function tryLoadProfile(page, candidates, navigationErrors) {
       await page.goto(candidate, { waitUntil: 'domcontentloaded', timeout: 60000 });
       await page.waitForTimeout(5000);
       const text = await bodyText(page);
-      if (authenticatedText(text)) {
+      if (authenticatedPage(page.url(), text)) {
         return true;
       }
       const diag = await pageDiagnostics(page);
@@ -316,7 +319,7 @@ try {
       await page.goto(detailUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
       await page.waitForTimeout(3500);
       const text = await bodyText(page);
-      if (authenticatedText(text)) {
+      if (authenticatedPage(page.url(), text)) {
         detailChunks.push(`\n\n[linkedin:${detailPath}]\n${text.slice(0, 40000)}`);
       }
     } catch {
@@ -330,7 +333,7 @@ try {
     await page.goto(activityUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
     await page.waitForTimeout(5000);
     const text = await bodyText(page);
-    snapshot.activityRawText = authenticatedText(text) ? text.slice(0, 60000) : '';
+    snapshot.activityRawText = authenticatedPage(page.url(), text) ? text.slice(0, 60000) : '';
   } catch {
     snapshot.activityRawText = '';
   }

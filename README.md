@@ -42,13 +42,7 @@ Me interesan los proyectos donde el valor está en conectar mundos que normalmen
 - **Seguridad y datos / Security and data** — Análisis de vulnerabilidades, OCR para información sensible, CVE scoring y automatización defensiva.  
   <sub>Vulnerability analysis, sensitive-data OCR, CVE scoring and defensive automation.</sub>
 
-## 🧑‍💻 Perfil profesional / Professional profile
-
-Trabajo en la intersección entre sistemas empresariales, backends modernos y tooling con IA. Mi foco es convertir problemas técnicos complejos en herramientas que otros desarrolladores puedan usar, revisar y mantener.
-
-<sub>I work at the intersection of enterprise systems, modern backends and AI-powered tooling. My focus is turning complex technical problems into tools other developers can use, review and maintain.</sub>
-
-**Perfil / Profile:** Inicia sesión en LinkedIn para estar en contacto con la gente que conoces, compartir ideas y avanzar profesionalmente.
+<!-- LinkedIn sync: sin datos renderizables; configurar LINKEDIN_COOKIE o LINKEDIN_PROFILE_JSON en GitHub Actions secrets. -->
 
 ## 🧰 Stack vivo / Live stack
 
