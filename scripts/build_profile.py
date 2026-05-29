@@ -375,6 +375,223 @@ def extract_linkedin_sections(lines: list[str], *, limit: int) -> dict[str, list
     return sections
 
 
+def linkedin_slug(url: str) -> str:
+    """Extrae el slug `/in/<slug>/` usado por LinkedIn."""
+    parsed = urllib.parse.urlparse(url)
+    match = re.search(r"/in/([^/?#]+)/?", parsed.path)
+    return urllib.parse.unquote(match.group(1)) if match else parsed.path.strip("/")
+
+
+def linkedin_csrf_token(cookie: str) -> str:
+    """Obtiene el token CSRF desde la cookie `JSESSIONID` de LinkedIn."""
+    match = re.search(r'(?:^|;\s*)JSESSIONID="?([^";]+)"?', cookie)
+    return html.unescape(match.group(1)) if match else ""
+
+
+def walk_dicts(value: Any) -> list[dict[str, Any]]:
+    """Recorre una estructura JSON y devuelve todos los diccionarios internos."""
+    rows: list[dict[str, Any]] = []
+    if isinstance(value, dict):
+        rows.append(value)
+        for child in value.values():
+            rows.extend(walk_dicts(child))
+    elif isinstance(value, list):
+        for child in value:
+            rows.extend(walk_dicts(child))
+    return rows
+
+
+def linkedin_plain(value: Any) -> str:
+    """Convierte textos RichText/Voyager en texto plano compacto."""
+    if isinstance(value, str):
+        return compact_text(value)
+    if isinstance(value, dict):
+        if isinstance(value.get("text"), str):
+            return compact_text(value["text"])
+        if isinstance(value.get("localized"), dict):
+            return compact_text(" ".join(str(item) for item in value["localized"].values()))
+        if isinstance(value.get("com.linkedin.common.TextViewModel"), dict):
+            return linkedin_plain(value["com.linkedin.common.TextViewModel"])
+    return ""
+
+
+def first_text(row: dict[str, Any], *keys: str) -> str:
+    """Devuelve el primer campo textual útil de un diccionario."""
+    for key in keys:
+        if key in row:
+            text = linkedin_plain(row.get(key))
+            if text:
+                return text
+    return ""
+
+
+def linkedin_date(value: Any) -> str:
+    """Formatea fechas parciales de LinkedIn cuando existen."""
+    if not isinstance(value, dict):
+        return ""
+    year = value.get("year")
+    month = value.get("month")
+    if year and month:
+        return f"{int(year):04d}-{int(month):02d}"
+    if year:
+        return str(year)
+    return ""
+
+
+def linkedin_period(row: dict[str, Any]) -> str:
+    """Extrae un rango temporal flexible desde estructuras Voyager."""
+    for key in ("dateRange", "timePeriod"):
+        period = row.get(key)
+        if isinstance(period, dict):
+            start = linkedin_date(period.get("start") or period.get("startDate"))
+            end = linkedin_date(period.get("end") or period.get("endDate")) or "Actualidad"
+            if start:
+                return f"{start} - {end}"
+    return first_text(row, "dateRange", "timePeriod", "period", "dates")
+
+
+def format_linkedin_entry(row: dict[str, Any], *, title_keys: tuple[str, ...], org_keys: tuple[str, ...]) -> str:
+    """Construye una línea profesional compacta desde un item Voyager."""
+    title = first_text(row, *title_keys)
+    organization = first_text(row, *org_keys)
+    period = linkedin_period(row)
+    description = first_text(row, "description", "summary", "subtitle")
+    parts = [part for part in (title, organization, period, description) if part]
+    return compact_text(" · ".join(parts), max_len=260)
+
+
+def find_view_elements(payload: dict[str, Any], view_names: tuple[str, ...]) -> list[dict[str, Any]]:
+    """Encuentra listas `elements` bajo vistas conocidas de LinkedIn Voyager."""
+    elements: list[dict[str, Any]] = []
+    for row in walk_dicts(payload):
+        for view_name in view_names:
+            view = row.get(view_name)
+            if isinstance(view, dict) and isinstance(view.get("elements"), list):
+                elements.extend(item for item in view["elements"] if isinstance(item, dict))
+            elif isinstance(view, list):
+                elements.extend(item for item in view if isinstance(item, dict))
+    return elements
+
+
+def collect_voyager_section(
+    payload: dict[str, Any],
+    *,
+    view_names: tuple[str, ...],
+    urn_markers: tuple[str, ...],
+    title_keys: tuple[str, ...],
+    org_keys: tuple[str, ...],
+    limit: int,
+) -> list[str]:
+    """Recolecta una sección desde vistas o entidades normalizadas de Voyager."""
+    candidates = find_view_elements(payload, view_names)
+    if not candidates:
+        for row in walk_dicts(payload):
+            urn = str(row.get("entityUrn") or row.get("*entity") or "").lower()
+            if any(marker in urn for marker in urn_markers):
+                candidates.append(row)
+
+    items: list[str] = []
+    for row in candidates:
+        text = format_linkedin_entry(row, title_keys=title_keys, org_keys=org_keys)
+        if text and text not in items:
+            items.append(text)
+        if len(items) >= limit:
+            break
+    return items
+
+
+def parse_voyager_profile(payload: dict[str, Any], *, source: str, url: str, limit: int) -> dict[str, Any]:
+    """Normaliza la respuesta Voyager/profileView al contrato del README."""
+    profile_rows = [
+        row
+        for row in walk_dicts(payload)
+        if any(key in row for key in ("headline", "summary", "firstName", "lastName", "publicIdentifier"))
+    ]
+    profile = profile_rows[0] if profile_rows else {}
+    headline = first_text(profile, "headline", "occupation")
+    summary = first_text(profile, "summary", "description")
+
+    sections = {
+        "experience": collect_voyager_section(
+            payload,
+            view_names=("positionView", "positions", "experienceView"),
+            urn_markers=("position", "experience"),
+            title_keys=("title", "name"),
+            org_keys=("companyName", "company", "organizationName"),
+            limit=limit,
+        ),
+        "projects": collect_voyager_section(
+            payload,
+            view_names=("projectView", "projects"),
+            urn_markers=("project",),
+            title_keys=("title", "name"),
+            org_keys=("occupation", "companyName", "organizationName"),
+            limit=limit,
+        ),
+        "courses": collect_voyager_section(
+            payload,
+            view_names=("courseView", "courses"),
+            urn_markers=("course",),
+            title_keys=("name", "title", "courseName"),
+            org_keys=("number", "provider", "organizationName"),
+            limit=limit,
+        ),
+        "publications": collect_voyager_section(
+            payload,
+            view_names=("publicationView", "publications"),
+            urn_markers=("publication",),
+            title_keys=("name", "title"),
+            org_keys=("publisher", "organizationName"),
+            limit=limit,
+        ),
+        "certifications": collect_voyager_section(
+            payload,
+            view_names=("certificationView", "certifications"),
+            urn_markers=("certification", "license"),
+            title_keys=("name", "title"),
+            org_keys=("authority", "companyName", "organizationName"),
+            limit=limit,
+        ),
+        "education": collect_voyager_section(
+            payload,
+            view_names=("educationView", "educations"),
+            urn_markers=("education",),
+            title_keys=("schoolName", "degreeName", "title", "name"),
+            org_keys=("degreeName", "fieldOfStudy", "organizationName"),
+            limit=limit,
+        ),
+    }
+    sections = {key: values for key, values in sections.items() if values}
+    return {
+        "available": bool(headline or summary or sections),
+        "source": source,
+        "url": url,
+        "headline": headline,
+        "summary": summary,
+        "sections": sections,
+        "reason": "" if (headline or summary or sections) else "Voyager respondió sin datos profesionales mapeables",
+    }
+
+
+def fetch_linkedin_voyager(url: str, cookie: str, *, limit: int) -> dict[str, Any]:
+    """Lee LinkedIn usando la API Voyager autenticada con la cookie del usuario."""
+    slug = linkedin_slug(url)
+    csrf = linkedin_csrf_token(cookie)
+    headers = {
+        "Accept": "application/vnd.linkedin.normalized+json+2.1",
+        "Cookie": cookie,
+        "Csrf-Token": csrf,
+        "X-Restli-Protocol-Version": "2.0.0",
+        "X-Li-Lang": "es_ES",
+        "X-Li-Track": '{"clientVersion":"1.0.0","osName":"web","timezoneOffset":-5,"deviceFormFactor":"DESKTOP"}',
+        "Referer": url,
+    }
+    endpoint = f"https://www.linkedin.com/voyager/api/identity/profiles/{urllib.parse.quote(slug)}/profileView"
+    raw = request_text(endpoint, headers=headers, retries=1)
+    payload = json.loads(raw)
+    return parse_voyager_profile(payload, source="LINKEDIN_COOKIE/voyager", url=url, limit=limit)
+
+
 def normalize_linkedin_payload(payload: dict[str, Any], *, source: str, url: str, limit: int) -> dict[str, Any]:
     """Normaliza una fuente estructurada de LinkedIn al contrato interno del README."""
     sections: dict[str, list[str]] = {}
@@ -445,6 +662,13 @@ def fetch_linkedin(config: dict[str, Any]) -> dict[str, Any]:
     attempts: list[str] = []
     cookie = os.environ.get("LINKEDIN_COOKIE")
     if cookie:
+        try:
+            parsed = fetch_linkedin_voyager(url, cookie, limit=limit)
+            if parsed.get("available"):
+                return parsed
+            attempts.append(str(parsed.get("reason") or "voyager sin datos extraíbles"))
+        except (FetchError, json.JSONDecodeError, TypeError) as exc:
+            attempts.append(f"voyager_api: {exc}")
         try:
             raw_html = request_text(url, headers={"Cookie": cookie}, retries=1)
             parsed = parse_linkedin_html(raw_html, source="LINKEDIN_COOKIE", url=url, limit=limit)

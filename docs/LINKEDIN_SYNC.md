@@ -47,6 +47,14 @@ Eso no imprime la cookie. Solo muestra un JSON seguro con:
 
 Si `LINKEDIN_COOKIE` o `LINKEDIN_PROFILE_JSON` existe pero no permite extraer datos profesionales, el workflow falla para que el problema sea visible en Actions en vez de publicar un README incompleto en silencio.
 
+Con `LINKEDIN_COOKIE`, el generador intenta primero la API autenticada Voyager:
+
+```text
+https://www.linkedin.com/voyager/api/identity/profiles/cehp94/profileView
+```
+
+Para eso deriva el header `Csrf-Token` desde `JSESSIONID`. Si tu cookie no incluye `JSESSIONID` y `li_at`, o si LinkedIn considera expirada la sesión, el diagnóstico fallará antes de regenerar el README.
+
 También puedes diagnosticarlo localmente:
 
 ```powershell
