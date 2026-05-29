@@ -70,26 +70,26 @@ Construyo herramientas para que entornos legacy, plataformas modernas y agentes 
 
 ## Actividad reciente / Recent activity
 
-**Resumen del año / Year snapshot:** 148 contribuciones en 2026 (40 commits públicos, 1 PR, 0 issues, 0 reviews, 102 contribuciones privadas/restringidas).
+**Resumen del año / Year snapshot:** 150 contribuciones en 2026 (42 commits públicos, 1 PR, 0 issues, 0 reviews, 102 contribuciones privadas/restringidas).
 
 ### Repositorios activos / Active repositories
 
 | Repo | Stack | Último push | Descripción |
 |---|---|---:|---|
 | [`MCP-IBMiDocs`](https://github.com/h0w4r/MCP-IBMiDocs) | HTML | 2026-05-26 | MCP comunitario para consultar documentación IBM i/AS400 desde un corpus local sin depender de APIs externas. |
-| [`as400-mcp`](https://github.com/h0w4r/as400-mcp) | Python | 2026-05-19 | Mi versión de Servidor MCP para AS400/IBM i: trabaje con bibliotecas, tablas y miembros de origen a través de una conexión ODBC |
-| [`Plugin-Codex-para-RDi`](https://github.com/h0w4r/Plugin-Codex-para-RDi) | Java | 2026-04-28 | Proyecto público en evolución. |
-| [`Codex-Migration-tool`](https://github.com/h0w4r/Codex-Migration-tool) | PowerShell | 2026-04-27 | Proyecto público en evolución. |
+| [`as400-mcp`](https://github.com/h0w4r/as400-mcp) | Python | 2026-05-19 | Servidor MCP read-only para explorar bibliotecas, tablas, fuentes y metadatos AS400/IBM i vía ODBC. |
+| [`Plugin-Codex-para-RDi`](https://github.com/h0w4r/Plugin-Codex-para-RDi) | Java | 2026-04-28 | Plugin Codex para IBM RDi/Eclipse con contexto de editores, RSE, fuentes remotas y flujos IBM i. |
+| [`Codex-Migration-tool`](https://github.com/h0w4r/Codex-Migration-tool) | PowerShell | 2026-04-27 | Migrador Windows para configuración global de Codex App, MCPs locales y secretos cifrados. |
 | [`Tema-Matrix-VsCode`](https://github.com/h0w4r/Tema-Matrix-VsCode) | multi-stack | 2026-03-14 | Tema matrix para VS Code |
 | [`sedapal`](https://github.com/h0w4r/sedapal) | Python | 2025-10-12 | Proyecto público en evolución. |
-| [`web-client-C`](https://github.com/h0w4r/web-client-C) | C | 2025-06-02 | Proyecto público en evolución. |
+| [`web-client-C`](https://github.com/h0w4r/web-client-C) | C | 2025-06-02 | Biblioteca REST en C enfocada en autorización de transacciones y concurrencia HTTP con libcurl. |
 
 ### Eventos públicos recientes / Recent public events
 
+- 2026-05-29: Push/actualización en `h0w4r` · rama `main`
+- 2026-05-29: Creó branch `refactor/perfil-ecosistema-vivo` en `h0w4r`
 - 2026-05-26: Push/actualización en `MCP-IBMiDocs` · rama `main`
 - 2026-05-26: Push/actualización en `MCP-IBMiDocs` · rama `main`
-- 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main`
-- 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main`
 - 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main`
 - 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main`
 
