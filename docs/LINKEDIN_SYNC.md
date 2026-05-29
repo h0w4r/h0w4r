@@ -102,6 +102,25 @@ Para el workflow self-hosted diario **ya no se requiere `LINKEDIN_COOKIE`**. La 
 
 `LINKEDIN_COOKIE` puede conservarse solo como fallback legacy para pruebas manuales o para `.github/workflows/update-profile.yml`, pero no es la ruta principal.
 
+## Auditoría rápida
+
+Para saber si el host quedó listo sin disparar un run a ciegas:
+
+```powershell
+.\scripts\test_linkedin_sync_ready.ps1
+```
+
+Cuando la sesión local ya exista, puedes validar LinkedIn vivo:
+
+```powershell
+.\scripts\test_linkedin_sync_ready.ps1 -LiveProbe
+```
+
+Y si todo está verde, disparar el workflow manual desde el mismo doctor:
+
+```powershell
+.\scripts\test_linkedin_sync_ready.ps1 -LiveProbe -DispatchWorkflow
+```
 ## Prueba local antes del primer run
 
 Ruta recomendada:
