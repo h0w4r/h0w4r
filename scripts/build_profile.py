@@ -44,6 +44,7 @@ BANNED_STRINGS = [
 # Cadenas mínimas que aseguran que el perfil nuevo tiene las piezas esperadas.
 REQUIRED_STRINGS = [
     "Chris Kirsch",
+    "Perfil profesional",
     "Ecosistema vivo",
     "Live ecosystem",
     "MCP-IBMiDocs",
@@ -1383,13 +1384,7 @@ def render_publication_analysis(linkedin: dict[str, Any]) -> str:
 
 
 def render_linkedin_snapshot(linkedin: dict[str, Any]) -> str:
-    """Renderiza un bloque profesional de LinkedIn si hay datos reales disponibles."""
-    if not linkedin.get("available"):
-        return (
-            "<!-- LinkedIn sync: sin datos renderizables; configurar LINKEDIN_COOKIE "
-            "o LINKEDIN_PROFILE_JSON en GitHub Actions secrets. -->"
-        )
-
+    """Renderiza perfil profesional y enriquece con LinkedIn cuando hay datos reales."""
     labels = {
         "projects": "Proyectos profesionales / Professional projects",
         "courses": "Formación continua / Continuous learning",
@@ -1405,6 +1400,9 @@ def render_linkedin_snapshot(linkedin: dict[str, Any]) -> str:
         "<sub>I work at the intersection of enterprise systems, modern backends and AI-powered tooling. "
         "My focus is turning complex technical problems into tools other developers can use, review and maintain.</sub>",
     ]
+    if not linkedin.get("available"):
+        return "\n".join(lines)
+
     if linkedin.get("headline"):
         lines.extend(["", f"**Foco actual / Current focus:** {md_escape(linkedin['headline'])}"])
     if linkedin.get("summary"):

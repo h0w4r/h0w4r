@@ -42,7 +42,11 @@ Me interesan los proyectos donde el valor está en conectar mundos que normalmen
 - **Seguridad y datos / Security and data** — Análisis de vulnerabilidades, OCR para información sensible, CVE scoring y automatización defensiva.  
   <sub>Vulnerability analysis, sensitive-data OCR, CVE scoring and defensive automation.</sub>
 
-<!-- LinkedIn sync: sin datos renderizables; configurar LINKEDIN_COOKIE o LINKEDIN_PROFILE_JSON en GitHub Actions secrets. -->
+## 🧑‍💻 Perfil profesional / Professional profile
+
+Trabajo en la intersección entre sistemas empresariales, backends modernos y tooling con IA. Mi foco es convertir problemas técnicos complejos en herramientas que otros desarrolladores puedan usar, revisar y mantener.
+
+<sub>I work at the intersection of enterprise systems, modern backends and AI-powered tooling. My focus is turning complex technical problems into tools other developers can use, review and maintain.</sub>
 
 ## 🧰 Stack vivo / Live stack
 
@@ -99,7 +103,7 @@ Lo que más me representa ahora mismo: herramientas open source, integración co
 
 ## 📡 Actividad reciente / Recent activity
 
-**Resumen del año / Year snapshot:** 176 contribuciones registradas por GitHub en 2026.
+**Resumen del año / Year snapshot:** 177 contribuciones registradas por GitHub en 2026.
 
 ### 🔥 Repositorios activos / Active repositories
 
@@ -119,7 +123,7 @@ Mis repos más activos aparecen primero para que puedas ver rápido qué estoy e
 ### 🛰️ Eventos públicos recientes / Recent public events
 
 - 2026-05-26: Push/actualización en `MCP-IBMiDocs` · rama `main` · 2 eventos
-- 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main` · 2 eventos
+- 2026-05-25: Push/actualización en `MCP-IBMiDocs` · rama `main`
 
 ---
 

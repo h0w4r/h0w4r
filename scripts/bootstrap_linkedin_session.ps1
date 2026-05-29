@@ -13,6 +13,8 @@ param(
   [string]$UserDataDir = (Join-Path $env:LOCALAPPDATA "h0w4r-linkedin-sync\browser-profile"),
   [ValidateSet("msedge", "chrome", "chromium", "bundled")]
   [string]$BrowserChannel = $(if ($env:LINKEDIN_BROWSER_CHANNEL) { $env:LINKEDIN_BROWSER_CHANNEL } else { "msedge" }),
+  [ValidateSet("native", "playwright")]
+  [string]$LoginMode = $(if ($env:LINKEDIN_LOGIN_MODE) { $env:LINKEDIN_LOGIN_MODE } else { "native" }),
   [switch]$SkipPlaywrightInstall,
   [switch]$WriteReadme,
   [switch]$KeepExistingProfileBrowsers
@@ -83,6 +85,63 @@ function Stop-ProfileBrowserProcesses {
   Start-Sleep -Seconds 2
 }
 
+function Resolve-BrowserExecutable {
+  param([string]$Channel)
+
+  $candidates = switch ($Channel) {
+    "msedge" {
+      @(
+        "C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+        "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+      )
+    }
+    "chrome" {
+      @(
+        "C:\Program Files\Google\Chrome\Application\chrome.exe",
+        "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+      )
+    }
+    default {
+      throw "Login nativo requiere BrowserChannel msedge o chrome; recibido: $Channel"
+    }
+  }
+
+  $browser = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+  if (-not $browser) {
+    throw "No encontré ejecutable local para $Channel."
+  }
+  return $browser
+}
+
+function Start-NativeLinkedInLogin {
+  param(
+    [string]$ProfileDir,
+    [string]$Channel,
+    [string]$Url
+  )
+
+  $browser = Resolve-BrowserExecutable -Channel $Channel
+  Write-Step "Abriendo $Channel nativo para login manual"
+  Write-Host "Esta ventana NO está controlada por Playwright, así Google no debería bloquear el SSO por automatización." -ForegroundColor Yellow
+  Write-Host "Si Google vuelve a bloquear, usa usuario/clave de LinkedIn en vez de 'Continuar con Google'." -ForegroundColor Yellow
+
+  $args = @(
+    "--user-data-dir=$ProfileDir",
+    "--profile-directory=Default",
+    "--new-window",
+    $Url
+  )
+  Start-Process -FilePath $browser -ArgumentList $args | Out-Null
+
+  Write-Host ""
+  Write-Host "1) Inicia sesión en LinkedIn en la ventana que acabo de abrir." -ForegroundColor Cyan
+  Write-Host "2) Confirma que puedes ver https://www.linkedin.com/in/cehp94/ autenticado." -ForegroundColor Cyan
+  Write-Host "3) Vuelve a esta consola y pulsa Enter para cerrar el perfil dedicado y validar con Playwright." -ForegroundColor Cyan
+  Read-Host "Pulsa Enter cuando el login esté listo" | Out-Null
+
+  Stop-ProfileBrowserProcesses -ProfileDir $ProfileDir
+}
+
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 Set-Location $RepoRoot
 
@@ -101,19 +160,27 @@ New-Item -ItemType Directory -Force -Path $UserDataDir | Out-Null
 Stop-ProfileBrowserProcesses -ProfileDir $UserDataDir
 Write-Step "Usando perfil persistente: $UserDataDir"
 Write-Step "Canal de navegador Playwright: $BrowserChannel"
-Write-Host "Se abrirá $BrowserChannel con un perfil dedicado. Inicia sesión ahí —no en tu Edge/Chrome normal— y luego pulsa Enter en esta consola." -ForegroundColor Yellow
+Write-Step "Modo de login: $LoginMode"
+Write-Host "Usa siempre la ventana/perfil dedicado que abre este script; tu Edge/Chrome normal no alimenta al workflow." -ForegroundColor Yellow
 
 $env:LINKEDIN_USER_DATA_DIR = $UserDataDir
 $env:LINKEDIN_PROFILE_URL = "https://www.linkedin.com/in/cehp94/"
 $env:LINKEDIN_BROWSER_CHANNEL = $BrowserChannel
 $env:PLAYWRIGHT_CHROMIUM_CHANNEL = $BrowserChannel
-$env:LINKEDIN_HEADLESS = "false"
-$env:LINKEDIN_INTERACTIVE_LOGIN = "1"
 Remove-Item Env:\LINKEDIN_COOKIE -ErrorAction SilentlyContinue
 
-Write-Step "Validando sesión interactiva contra LinkedIn"
+if ($LoginMode -eq "native") {
+  Start-NativeLinkedInLogin -ProfileDir $UserDataDir -Channel $BrowserChannel -Url $env:LINKEDIN_PROFILE_URL
+  $env:LINKEDIN_HEADLESS = "true"
+  Remove-Item Env:\LINKEDIN_INTERACTIVE_LOGIN -ErrorAction SilentlyContinue
+} else {
+  $env:LINKEDIN_HEADLESS = "false"
+  $env:LINKEDIN_INTERACTIVE_LOGIN = "1"
+}
+
+Write-Step "Validando sesión persistente contra LinkedIn"
 node scripts/fetch_linkedin_profile.mjs > .linkedin-profile.json
-Assert-NativeSuccess "Extracción interactiva de LinkedIn"
+Assert-NativeSuccess "Extracción de LinkedIn"
 Assert-JsonFile ".linkedin-profile.json" "snapshot LinkedIn"
 
 $env:LINKEDIN_PROFILE_JSON_FILE = ".linkedin-profile.json"

@@ -147,5 +147,9 @@ if ($failures.Count -gt 0) {
   exit 1
 }
 
-Write-Host "`nOK: el sync LinkedIn está listo para ejecución diaria/manual." -ForegroundColor Green
+if ($LiveProbe) {
+  Write-Host "`nOK: LinkedIn vivo fue validado; el sync está listo para ejecución diaria/manual." -ForegroundColor Green
+} else {
+  Write-Host "`nOK: infraestructura local detectada. Para validar sesión LinkedIn real ejecuta: .\scripts\test_linkedin_sync_ready.ps1 -LiveProbe -BrowserChannel $BrowserChannel" -ForegroundColor Green
+}
 exit 0

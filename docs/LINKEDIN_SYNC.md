@@ -56,7 +56,18 @@ Para dejarlo resistente a reinicios, conviene instalarlo como servicio con `svc.
 ## Crear o renovar la sesión local de LinkedIn
 
 
-Por defecto el flujo usa **Microsoft Edge** (`msedge`), porque es el navegador principal del host. Si algún día quieres forzar Chrome:
+Por defecto el flujo usa **Microsoft Edge** (`msedge`), porque es el navegador principal del host. El bootstrap abre primero Edge de forma **nativa/no automatizada** con el perfil dedicado y luego valida con Playwright; esto evita el bloqueo de Google que aparece cuando se intenta usar “Continuar con Google” dentro de un navegador controlado por pruebas automatizadas.
+
+Ruta recomendada:
+
+```powershell
+.\scripts\bootstrap_linkedin_session.ps1 -BrowserChannel msedge
+.\scripts\test_linkedin_sync_ready.ps1 -LiveProbe -BrowserChannel msedge
+```
+
+Si Google vuelve a mostrar “No puedes acceder”, usa usuario/clave de LinkedIn en esa misma ventana nativa o entra primero a Google desde esa ventana antes de volver a LinkedIn. No uses tu Edge normal: tiene otra sesión y el workflow ni se entera.
+
+Si algún día quieres forzar Chrome:
 
 ```powershell
 .\scripts\bootstrap_linkedin_session.ps1 -BrowserChannel chrome
@@ -74,10 +85,11 @@ En la misma máquina y con el mismo usuario que ejecutará el runner:
 Qué hace:
 
 1. Instala el cliente Playwright sin descargar navegador.
-2. Abre Edge —o el canal configurado— con un perfil dedicado en `%LOCALAPPDATA%\h0w4r-linkedin-sync\browser-profile`.
+2. Abre Edge/Chrome nativo —no controlado por Playwright— con un perfil dedicado en `%LOCALAPPDATA%\h0w4r-linkedin-sync\browser-profile`.
 3. Te deja iniciar sesión manualmente en LinkedIn.
-4. Extrae `.linkedin-profile.json`.
-5. Ejecuta el diagnóstico con `LINKEDIN_SNAPSHOT_ONLY=1`.
+4. Cierra cualquier proceso de ese perfil dedicado para liberar locks.
+5. Extrae `.linkedin-profile.json` con Playwright usando la sesión ya guardada.
+6. Ejecuta el diagnóstico con `LINKEDIN_SNAPSHOT_ONLY=1`.
 
 Si el runner se instala como servicio con otro usuario, repite este bootstrap bajo ese mismo usuario. Si no, Windows guardará la sesión en un barrio distinto y el workflow entrará a LinkedIn como turista perdido en Miraflores.
 
