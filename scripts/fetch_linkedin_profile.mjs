@@ -9,7 +9,9 @@ const profileUrl = process.env.LINKEDIN_PROFILE_URL || 'https://www.linkedin.com
 const cookieHeader = process.env.LINKEDIN_COOKIE || '';
 
 function parseCookieHeader(header) {
+  const normalizedHeader = String(header || '').replace(/^cookie:\s*/i, '').trim();
   return header
+    ? normalizedHeader
     .split(';')
     .map((part) => part.trim())
     .filter(Boolean)
@@ -29,7 +31,8 @@ function parseCookieHeader(header) {
         sameSite: 'Lax',
       };
     })
-    .filter(Boolean);
+    .filter(Boolean)
+    : [];
 }
 
 function compact(value, limit = 400) {
@@ -68,7 +71,12 @@ try {
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
       '(KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
   });
-  await context.addCookies(parseCookieHeader(cookieHeader));
+  const parsedCookies = parseCookieHeader(cookieHeader);
+  const cookieNames = new Set(parsedCookies.map((cookie) => cookie.name.toLowerCase()));
+  console.error(
+    `LinkedIn cookie diagnostics: count=${parsedCookies.length} has_li_at=${cookieNames.has('li_at')} has_jsessionid=${cookieNames.has('jsessionid')}`,
+  );
+  await context.addCookies(parsedCookies);
   const page = await context.newPage();
   await page.route('**/*', async (route) => {
     const resourceType = route.request().resourceType();
