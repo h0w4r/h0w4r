@@ -65,7 +65,16 @@ Ruta recomendada:
 .\scripts\test_linkedin_sync_ready.ps1 -LiveProbe -BrowserChannel msedge
 ```
 
-Si Google vuelve a mostrar “No puedes acceder”, usa usuario/clave de LinkedIn en esa misma ventana nativa o entra primero a Google desde esa ventana antes de volver a LinkedIn. No uses tu Edge normal: tiene otra sesión y el workflow ni se entera.
+Si aparece el banner **“Un software de pruebas automatizadas está controlando Microsoft Edge”**, estás en una ventana controlada por Playwright o en un perfil dedicado que quedó contaminado por una ejecución anterior. Cierra esa ventana y renueva el perfil así:
+
+```powershell
+.\scripts\bootstrap_linkedin_session.ps1 -BrowserChannel msedge -ResetProfile
+.\scripts\test_linkedin_sync_ready.ps1 -LiveProbe -BrowserChannel msedge
+```
+
+`-ResetProfile` no borra tu Edge personal: mueve solo el perfil dedicado de sync a una carpeta tipo `browser-profile.bak-YYYYMMDDHHMMSS` y crea uno limpio. Cirugía menor, sin drama.
+
+Si Google vuelve a mostrar “No puedes acceder” incluso en la ventana nativa limpia, usa usuario/clave de LinkedIn en esa misma ventana o entra primero a Google desde esa ventana antes de volver a LinkedIn. No uses tu Edge normal: tiene otra sesión y el workflow ni se entera.
 
 Si algún día quieres forzar Chrome:
 

@@ -17,6 +17,7 @@ param(
   [string]$LoginMode = $(if ($env:LINKEDIN_LOGIN_MODE) { $env:LINKEDIN_LOGIN_MODE } else { "native" }),
   [switch]$SkipPlaywrightInstall,
   [switch]$WriteReadme,
+  [switch]$ResetProfile,
   [switch]$KeepExistingProfileBrowsers
 )
 
@@ -83,6 +84,22 @@ function Stop-ProfileBrowserProcesses {
     Stop-Process -Id $process.ProcessId -Force
   }
   Start-Sleep -Seconds 2
+}
+
+function Backup-ExistingProfile {
+  param([string]$ProfileDir)
+
+  if (-not $ResetProfile -or -not (Test-Path $ProfileDir)) {
+    return
+  }
+
+  Stop-ProfileBrowserProcesses -ProfileDir $ProfileDir
+  $parent = Split-Path -Parent $ProfileDir
+  $name = Split-Path -Leaf $ProfileDir
+  $timestamp = Get-Date -Format "yyyyMMddHHmmss"
+  $backupPath = Join-Path $parent "$name.bak-$timestamp"
+  Move-Item -LiteralPath $ProfileDir -Destination $backupPath
+  Write-Step "Perfil dedicado anterior movido a: $backupPath"
 }
 
 function Resolve-BrowserExecutable {
@@ -156,6 +173,7 @@ if (-not $SkipPlaywrightInstall) {
   Assert-NativeSuccess "npm install playwright"
 }
 
+Backup-ExistingProfile -ProfileDir $UserDataDir
 New-Item -ItemType Directory -Force -Path $UserDataDir | Out-Null
 Stop-ProfileBrowserProcesses -ProfileDir $UserDataDir
 Write-Step "Usando perfil persistente: $UserDataDir"
