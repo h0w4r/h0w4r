@@ -44,12 +44,13 @@ jobs:
 
       - name: Extraer snapshot LinkedIn con navegador
         if: env.LINKEDIN_COOKIE_PRESENT == 'true'
+        timeout-minutes: 5
         env:
           LINKEDIN_COOKIE: ${{ secrets.LINKEDIN_COOKIE }}
           LINKEDIN_PROFILE_URL: "https://www.linkedin.com/in/cehp94/"
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
         run: |
-          npm install --no-save playwright@1.56.1
-          npx playwright install chromium
+          npm install --no-save --ignore-scripts playwright@1.56.1
           node scripts/fetch_linkedin_profile.mjs > .linkedin-profile.json
 
       - name: Diagnosticar fuente LinkedIn

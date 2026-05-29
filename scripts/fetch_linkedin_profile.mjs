@@ -42,7 +42,11 @@ if (!cookieHeader) {
   process.exit(0);
 }
 
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({
+  channel: process.env.PLAYWRIGHT_CHROMIUM_CHANNEL || 'chrome',
+  headless: true,
+  args: ['--no-sandbox', '--disable-dev-shm-usage'],
+});
 try {
   const context = await browser.newContext({
     locale: 'es-PE',
