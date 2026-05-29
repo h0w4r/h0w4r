@@ -10,6 +10,8 @@ venv/
 .env.*
 *.log
 .local/
+.linkedin-profile.json
+.tmp-*.json
 
 # Artefactos de editores y sistema operativo.
 .DS_Store

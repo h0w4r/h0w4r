@@ -73,6 +73,74 @@ LINKEDIN_AUTHWALL_MARKERS = (
     "únete a linkedin",
 )
 
+LINKEDIN_UI_NOISE_EXACT = {
+    "0 notificaciones",
+    "notificaciones",
+    "notifications",
+    "comentarios",
+    "imágenes",
+    "images",
+    "posts",
+    "actividad",
+    "activity",
+    "inicio",
+    "home",
+    "feed",
+    "empleos",
+    "jobs",
+    "mensajes",
+    "messaging",
+    "mi red",
+    "my network",
+    "ver perfil",
+    "view profile",
+    "mostrar todo",
+    "show all",
+    "mostrar más",
+    "show more",
+    "guardar",
+    "save",
+}
+
+LINKEDIN_UI_NOISE_PATTERNS = (
+    r"^\d+\s+notificaciones?$",
+    r"^\d+\s+notifications?$",
+    r"^activar para ver una imagen más grande$",
+    r"^christian enrique huicho prado$",
+    r"^ingeniero de software\s*\|\s*procesos de medios de pago y banca\.?$",
+    r"^linkedin member$",
+    r"^premium$",
+    r"^hashtag$",
+    r"^reacciones?$",
+    r"^comments?$",
+    r"^shares?$",
+)
+
+LINKEDIN_SECTION_CHUNK_SIZES = {
+    "experience": 4,
+    "projects": 4,
+    "courses": 3,
+    "publications": 3,
+    "certifications": 4,
+    "education": 2,
+}
+
+LINKEDIN_PUBLICATION_SIGNALS = re.compile(
+    r"(?:\b(?:19|20)\d{2}\b|doi|isbn|issn|publica(?:do|ción|tion)|published|publisher|revista|journal|conference|congreso|https?://)",
+    re.IGNORECASE,
+)
+
+LINKEDIN_README_NOISE_PATTERNS = (
+    "0 notificaciones",
+    "0 notifications",
+    "Join LinkedIn",
+    "Agree & Join LinkedIn",
+    "Sign in to view",
+    "authwall",
+    "\n- Comentarios\n",
+    "\n- Imágenes\n",
+)
+
 
 class FetchError(RuntimeError):
     """Error recuperable al consultar una API externa."""
@@ -273,7 +341,7 @@ def normalize_linkedin_list(value: Any, *, limit: int) -> list[str]:
         else:
             text = str(item)
         text = compact_text(text)
-        if text and text not in items:
+        if text and not is_linkedin_noise(text) and text not in items:
             items.append(text)
         if len(items) >= limit:
             break
@@ -303,6 +371,67 @@ def compact_text(value: Any, *, max_len: int = 220) -> str:
     return text[: max_len - 1].rstrip() + "…"
 
 
+def is_linkedin_noise(value: str) -> bool:
+    """Detecta texto de navegación/UI de LinkedIn que no debe llegar al README."""
+    text = compact_text(value, max_len=260)
+    if not text:
+        return True
+    lower = text.lower().strip(" -·|•\t\r\n")
+    if lower in LINKEDIN_UI_NOISE_EXACT:
+        return True
+    return any(re.search(pattern, lower, flags=re.IGNORECASE) for pattern in LINKEDIN_UI_NOISE_PATTERNS)
+
+
+def clean_linkedin_lines(lines: list[str]) -> list[str]:
+    """Deduplica y elimina ruido común de LinkedIn conservando orden."""
+    cleaned: list[str] = []
+    seen: set[str] = set()
+    for line in lines:
+        text = compact_text(line, max_len=260)
+        key = text.lower()
+        if not text or key in seen or is_linkedin_noise(text):
+            continue
+        seen.add(key)
+        cleaned.append(text)
+    return cleaned
+
+
+def sanitize_linkedin_headline(value: Any) -> str:
+    """Evita que contadores/notificaciones del DOM se rendericen como headline."""
+    headline = compact_text(value, max_len=180)
+    if is_linkedin_noise(headline):
+        return ""
+    if len(headline) < 8 or not re.search(r"[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]{3,}", headline):
+        return ""
+    if re.search(r"(linkedin|feed|inicio|home|notification|notificación)", headline, flags=re.IGNORECASE):
+        return ""
+    return headline
+
+
+def group_linkedin_section_lines(key: str, lines: list[str], *, limit: int) -> list[str]:
+    """Agrupa líneas consecutivas de LinkedIn en items profesionales legibles."""
+    cleaned = clean_linkedin_lines(lines)
+    if key == "publications" and not any(LINKEDIN_PUBLICATION_SIGNALS.search(line) for line in cleaned):
+        # La sección de publicaciones suele mezclar actividad/feed; si no hay una
+        # señal bibliográfica o temporal clara, es mejor no mostrar basura.
+        return []
+
+    chunk_size = LINKEDIN_SECTION_CHUNK_SIZES.get(key, 3)
+    grouped: list[str] = []
+    for index in range(0, len(cleaned), chunk_size):
+        chunk = cleaned[index : index + chunk_size]
+        if not chunk:
+            continue
+        if key in {"experience", "projects", "certifications"} and len(chunk) == 1 and len(chunk[0]) < 12:
+            continue
+        item = compact_text(" · ".join(chunk), max_len=280)
+        if item and item not in grouped:
+            grouped.append(item)
+        if len(grouped) >= limit:
+            break
+    return grouped
+
+
 def visible_text_from_html(raw_html: str) -> list[str]:
     """Extrae líneas visibles de HTML de LinkedIn con filtros de ruido comunes."""
     text = re.sub(r"(?is)<(script|style|noscript|svg|template).*?</\1>", " ", raw_html)
@@ -312,23 +441,10 @@ def visible_text_from_html(raw_html: str) -> list[str]:
     text = html.unescape(text)
     lines: list[str] = []
     seen: set[str] = set()
-    noise = {
-        "linkedin",
-        "feed",
-        "jobs",
-        "messaging",
-        "notifications",
-        "home",
-        "skip to main content",
-        "agree & join linkedin",
-        "join linkedin",
-        "sign in",
-        "sign up",
-    }
     for raw_line in text.splitlines():
         line = compact_text(raw_line, max_len=260)
         key = line.lower()
-        if len(line) < 3 or key in noise or key in seen:
+        if len(line) < 3 or is_linkedin_noise(line) or key in seen:
             continue
         seen.add(key)
         lines.append(line)
@@ -383,16 +499,18 @@ def extract_linkedin_sections(lines: list[str], *, limit: int) -> dict[str, list
     for pos, (start_index, key) in enumerate(section_indexes):
         end_index = section_indexes[pos + 1][0] if pos + 1 < len(section_indexes) else min(len(lines), start_index + 28)
         candidates: list[str] = []
+        max_candidate_lines = max(limit * LINKEDIN_SECTION_CHUNK_SIZES.get(key, 3), limit)
         for line in lines[start_index + 1 : end_index]:
             lower_line = line.lower()
-            if lower_line in alias_to_key or "show all" in lower_line or "mostrar todo" in lower_line:
+            if lower_line in alias_to_key or is_linkedin_noise(line):
                 continue
-            if 3 <= len(line) <= 220 and line not in candidates:
+            if 3 <= len(line) <= 260 and line not in candidates:
                 candidates.append(line)
-            if len(candidates) >= limit:
+            if len(candidates) >= max_candidate_lines:
                 break
-        if candidates:
-            sections[key] = candidates
+        grouped = group_linkedin_section_lines(key, candidates, limit=limit)
+        if grouped:
+            sections[key] = grouped
     return sections
 
 
@@ -413,7 +531,7 @@ def extract_linkedin_about(lines: list[str]) -> str:
             lower_candidate = candidate.strip().lower()
             if lower_candidate in aliases or lower_candidate in stop_aliases:
                 break
-            if "show all" in lower_candidate or "mostrar todo" in lower_candidate:
+            if is_linkedin_noise(candidate):
                 continue
             if len(candidate) >= 20:
                 chunks.append(candidate)
@@ -557,7 +675,7 @@ def parse_voyager_profile(payload: dict[str, Any], *, source: str, url: str, lim
         if any(key in row for key in ("headline", "summary", "firstName", "lastName", "publicIdentifier"))
     ]
     profile = profile_rows[0] if profile_rows else {}
-    headline = first_text(profile, "headline", "occupation")
+    headline = sanitize_linkedin_headline(first_text(profile, "headline", "occupation"))
     summary = first_text(profile, "summary", "description")
 
     sections = {
@@ -610,6 +728,7 @@ def parse_voyager_profile(payload: dict[str, Any], *, source: str, url: str, lim
             limit=limit,
         ),
     }
+    sections = {key: clean_linkedin_lines(values) for key, values in sections.items() if values}
     sections = {key: values for key, values in sections.items() if values}
     return {
         "available": bool(headline or summary or sections),
@@ -645,7 +764,10 @@ def normalize_linkedin_payload(payload: dict[str, Any], *, source: str, url: str
     """Normaliza una fuente estructurada de LinkedIn al contrato interno del README."""
     sections: dict[str, list[str]] = {}
     for key in LINKEDIN_SECTION_ALIASES:
-        sections[key] = normalize_linkedin_list(payload.get(key), limit=limit)
+        values = normalize_linkedin_list(payload.get(key), limit=limit)
+        if key == "publications" and not any(LINKEDIN_PUBLICATION_SIGNALS.search(value) for value in values):
+            values = []
+        sections[key] = values
     raw_text = payload.get("rawText") or payload.get("raw_text") or ""
     if raw_text:
         lines = [compact_text(line, max_len=260) for line in str(raw_text).splitlines()]
@@ -666,7 +788,7 @@ def normalize_linkedin_payload(payload: dict[str, Any], *, source: str, url: str
     )
     if not summary and raw_text:
         summary = extract_linkedin_about([compact_text(line, max_len=260) for line in str(raw_text).splitlines() if line.strip()])
-    headline = compact_text(payload.get("headline") or payload.get("title"), max_len=180)
+    headline = sanitize_linkedin_headline(payload.get("headline") or payload.get("title"))
     return {
         "available": bool(summary or headline or sections),
         "source": source,
@@ -691,7 +813,9 @@ def parse_linkedin_html(raw_html: str, *, source: str, url: str, limit: int) -> 
         compact_text(person.get("description"), max_len=360)
         or extract_meta_value(raw_html, "description", "og:description")
     )
-    headline = compact_text(person.get("jobTitle"), max_len=180) or extract_meta_value(raw_html, "og:title", "title")
+    headline = sanitize_linkedin_headline(person.get("jobTitle")) or sanitize_linkedin_headline(
+        extract_meta_value(raw_html, "og:title", "title")
+    )
     return {
         "available": bool(summary or headline or sections),
         "source": source,
@@ -1229,6 +1353,9 @@ def validate_content(content: str) -> list[str]:
     for banned in BANNED_STRINGS:
         if banned in content:
             errors.append(f"Contenido prohibido detectado: {banned}")
+    for noisy in LINKEDIN_README_NOISE_PATTERNS:
+        if noisy in content:
+            errors.append(f"Ruido de LinkedIn detectado en README: {noisy.strip()}")
     for required in REQUIRED_STRINGS:
         if required not in content:
             errors.append(f"Contenido requerido ausente: {required}")
