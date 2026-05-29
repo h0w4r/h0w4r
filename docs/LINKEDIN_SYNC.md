@@ -1,33 +1,37 @@
 # Sincronización diaria con LinkedIn
 
-Este perfil se actualiza desde tres fuentes: GitHub, Gravatar y LinkedIn. GitHub y Gravatar son estables para API; LinkedIn no lo es tanto: en runners públicos suele responder con `429`, `999`, redirects o authwall aunque la cookie sea válida. El resultado práctico: el runner público de GitHub sirve como fallback/manual, pero no como fuente diaria confiable para LinkedIn vivo.
+Este perfil se actualiza desde tres fuentes: GitHub, Gravatar y LinkedIn. GitHub y Gravatar tienen APIs estables; LinkedIn, en cambio, suele bloquear runners públicos con `429`, `999`, redirects o authwall aunque una cookie sea válida. Por eso la fuente diaria real para LinkedIn queda anclada a un runner propio con sesión local persistente.
 
-## Decisión técnica
+## Decisión técnica vigente
 
 La ruta principal queda así:
 
 1. **Workflow diario self-hosted**: `.github/workflows/update-profile-self-hosted.yml`.
 2. **Runner Windows propio** con etiqueta `linkedin-sync`.
-3. **Snapshot vivo de LinkedIn** con `scripts/fetch_linkedin_profile.mjs`.
-4. **Generación del README** con `scripts/build_profile.py`, sin usar `LINKEDIN_PROFILE_JSON` como respaldo silencioso.
+3. **Sesión local persistente** creada con `scripts/bootstrap_linkedin_session.ps1` en `%LOCALAPPDATA%\h0w4r-linkedin-sync\browser-profile`.
+4. **Snapshot vivo de LinkedIn** con `scripts/fetch_linkedin_profile.mjs`.
+5. **Generación del README** con `scripts/build_profile.py`, usando `LINKEDIN_SNAPSHOT_ONLY=1` para no publicar fallback viejo si LinkedIn falla.
 
 El workflow antiguo `.github/workflows/update-profile.yml` queda como ejecución manual/fallback. Ya no es el cron principal, para evitar que un runner público bloquee LinkedIn y termine publicando contenido menos fresco.
 
-## Por qué no usar una API intermedia como ruta principal
+## Investigación: API oficial y APIs intermedias
 
-Se revisaron tres familias de opciones:
-
-| Opción | Resultado | Motivo |
+| Opción | Estado | Decisión |
 | --- | --- | --- |
-| API oficial de LinkedIn | No viable para este objetivo | La lectura de posts personales requiere `r_member_social`, que LinkedIn documenta como permiso restringido/cerrado para usuarios aprobados. El perfil completo también está detrás de permisos/partner access. |
-| APIs intermedias tipo Proxycurl/Apify/Unipile | Técnicamente posibles, pero no ideales como core | En la práctica actúan como wrappers/scrapers, tienen coste, límites, variación de calidad y no garantizan la misma profundidad de datos del perfil autenticado propio. |
-| Runner propio con sesión autorizada | Ruta elegida | Usa tu propia sesión, desde tu red/host, con control total del pipeline y sin depender del fingerprint de los runners públicos. |
+| API oficial de LinkedIn | No viable para este objetivo completo | La API abierta permite OIDC básico (`profile`, `email`) y escritura social (`w_member_social`), pero leer posts personales requiere `r_member_social`, documentado como restringido/cerrado para usuarios aprobados. El perfil completo también depende de permisos cerrados/partner access. |
+| OutX | Viable como capa intermedia, pero no como core ahora | Ofrece endpoints para perfiles y posts, pero requiere API key y extensión de Chrome activa en una sesión real dentro de las últimas 48h. Eso igual nos deja dependiendo de una sesión de navegador, solo que metiendo un tercero en medio. |
+| Unipile | Viable comercialmente, no ideal para este README | Expone perfil, posts, followers, acciones y conexión de cuentas, pero está orientado a apps multiusuario/CRM/ATS/outreach. Para un README personal diario sería más infraestructura de la necesaria. |
+| Apify / actores de scraping | Viable como job externo, variable por actor | Puede ejecutar scrapers vía API, pero la calidad depende del actor elegido, coste, límites y mantenimiento ante cambios de LinkedIn. Útil como plan B puntual, flojo como fuente principal elegante. |
+| Sesión local persistente en runner propio | Ruta elegida | No depende de un tercero, evita el fingerprint del runner público, usa la red/host real de Chris y permite fallar explícitamente si la sesión expira. Menos glamour SaaS, más control. Como debe ser. |
 
-Referencias útiles:
+Referencias revisadas:
 
 - [LinkedIn - Getting Access to LinkedIn APIs](https://learn.microsoft.com/linkedin/shared/authentication/getting-access)
-- [LinkedIn - Posts API](https://learn.microsoft.com/linkedin/marketing/community-management/shares/posts-api?view=li-lms-2026-05#find-posts-by-authors)
-- [LinkedIn - Marketing API FAQ](https://learn.microsoft.com/linkedin/marketing/lms-faq?view=li-lms-2026-05#permissions)
+- [LinkedIn - Posts API / permisos](https://learn.microsoft.com/linkedin/marketing/community-management/shares/posts-api?view=li-lms-2026-05#permissions)
+- [LinkedIn - Marketing API FAQ / permisos cerrados](https://learn.microsoft.com/linkedin/marketing/lms-faq?view=li-lms-2026-05#permissions)
+- [OutX API - LinkedIn Data](https://www.outx.ai/docs/api-reference/introduction)
+- [Unipile Social Media API](https://www.unipile.com/social-media-api/)
+- [Apify API](https://docs.apify.com/api)
 - [GitHub - usar runners self-hosted en workflows](https://docs.github.com/en/actions/how-tos/managing-self-hosted-runners/using-self-hosted-runners-in-a-workflow)
 - [GitHub - labels para runners self-hosted](https://docs.github.com/en/actions/how-tos/managing-self-hosted-runners/using-labels-with-self-hosted-runners)
 
@@ -47,7 +51,25 @@ El instalador:
 4. Lo deja bajo `.local/actions-runner/`, ignorado por git.
 5. Opcionalmente lo arranca en segundo plano con `-StartNow`.
 
-Esto desbloquea el workflow diario sin pegar tokens en archivos ni en commits. Para dejarlo resistente a reinicios, después conviene instalarlo como servicio con `svc.cmd` desde PowerShell administrador.
+Para dejarlo resistente a reinicios, conviene instalarlo como servicio con `svc.cmd` desde PowerShell administrador.
+
+## Crear o renovar la sesión local de LinkedIn
+
+En la misma máquina y con el mismo usuario que ejecutará el runner:
+
+```powershell
+.\scripts\bootstrap_linkedin_session.ps1
+```
+
+Qué hace:
+
+1. Instala el cliente Playwright sin descargar navegador.
+2. Abre Chrome con un perfil dedicado en `%LOCALAPPDATA%\h0w4r-linkedin-sync\browser-profile`.
+3. Te deja iniciar sesión manualmente en LinkedIn.
+4. Extrae `.linkedin-profile.json`.
+5. Ejecuta el diagnóstico con `LINKEDIN_SNAPSHOT_ONLY=1`.
+
+Si el runner se instala como servicio con otro usuario, repite este bootstrap bajo ese mismo usuario. Si no, Windows guardará la sesión en un barrio distinto y el workflow entrará a LinkedIn como turista perdido en Miraflores.
 
 ## Configuración del runner self-hosted
 
@@ -67,55 +89,44 @@ El workflow usa:
 runs-on: [self-hosted, windows, linkedin-sync]
 ```
 
-Eso evita que otro runner self-hosted agarre este job por accidente. Nada de magia negra; solo una etiqueta con buen gusto.
-
-Recomendación: instalarlo como servicio para que el sync diario corra aunque no haya consola abierta:
+Recomendación para servicio:
 
 ```powershell
 .\svc.cmd install
 .\svc.cmd start
 ```
 
-## Secret requerido
+## Secrets
 
-Mantener el secret existente:
+Para el workflow self-hosted diario **ya no se requiere `LINKEDIN_COOKIE`**. La sesión vive en el perfil local persistente.
 
-```powershell
-gh secret set LINKEDIN_COOKIE --repo h0w4r/h0w4r
-```
-
-Debe incluir al menos `li_at` y `JSESSIONID`. Si la sesión expira, el workflow fallará explícitamente en el diagnóstico de LinkedIn vivo, en lugar de publicar un README con datos viejos como si nada hubiera pasado.
+`LINKEDIN_COOKIE` puede conservarse solo como fallback legacy para pruebas manuales o para `.github/workflows/update-profile.yml`, pero no es la ruta principal.
 
 ## Prueba local antes del primer run
 
-En la máquina donde vivirá el runner:
+Ruta recomendada:
 
 ```powershell
-# Opción A: variable temporal
-$env:LINKEDIN_COOKIE = '<pegar header Cookie de LinkedIn>'
-.\scripts\sync_linkedin_self_hosted.ps1
-Remove-Item Env:\LINKEDIN_COOKIE
-
-# Opción B: archivo local ignorado por git
-Set-Content .linkedin-cookie.txt '<pegar header Cookie de LinkedIn>'
-.\scripts\sync_linkedin_self_hosted.ps1
-Remove-Item .linkedin-cookie.txt
+.\scripts\bootstrap_linkedin_session.ps1
+.\scripts\sync_linkedin_self_hosted.ps1 -WriteReadme
 ```
 
-Para regenerar `README.md` localmente durante una prueba:
+Fallback legacy con cookie, solo si hiciera falta:
 
 ```powershell
-.\scripts\sync_linkedin_self_hosted.ps1 -WriteReadme
+$env:LINKEDIN_COOKIE = '<pegar header Cookie de LinkedIn>'
+.\scripts\sync_linkedin_self_hosted.ps1 -ForceCookie
+Remove-Item Env:\LINKEDIN_COOKIE
 ```
 
 ## Operación diaria
 
 El workflow self-hosted corre todos los días a las **06:22 de Lima** (`11:22 UTC`). Pasos principales:
 
-1. Valida que `LINKEDIN_COOKIE` exista.
+1. Valida que exista el perfil local de LinkedIn.
 2. Instala solo el cliente Playwright y usa Chrome local del runner.
-3. Extrae `.linkedin-profile.json` con sesión autenticada.
-4. Ejecuta diagnóstico sin fallback.
+3. Extrae `.linkedin-profile.json` desde la sesión persistente.
+4. Ejecuta diagnóstico sin fallback (`LINKEDIN_SNAPSHOT_ONLY=1`).
 5. Genera y valida `README.md`.
 6. Hace commit solo si cambió el README.
 

@@ -230,6 +230,11 @@ def linkedin_secret_configured() -> bool:
     )
 
 
+def env_truthy(name: str) -> bool:
+    """Lee banderas booleanas desde variables de entorno de forma tolerante."""
+    return str(os.environ.get(name, "")).strip().lower() in {"1", "true", "yes", "y", "on", "si", "sí"}
+
+
 def request_json(
     url: str,
     *,
@@ -947,23 +952,42 @@ def fetch_linkedin(config: dict[str, Any]) -> dict[str, Any]:
 
     Orden de fuentes:
     1. `LINKEDIN_PROFILE_JSON_FILE`: snapshot vivo extraído por Playwright en el workflow.
-    2. `LINKEDIN_COOKIE`: sesión guardada como GitHub Actions secret para leer la página real.
+    2. `LINKEDIN_COOKIE`: fallback legacy para leer la página real.
     3. `LINKEDIN_PROFILE_JSON`: snapshot estructurado de emergencia si LinkedIn bloquea al runner.
     4. Acceso público directo/proxy: normalmente LinkedIn responde authwall/999, pero se intenta.
+
+    Si `LINKEDIN_SNAPSHOT_ONLY=1`, el generador no hace fallback a cookie/API pública:
+    falla explícitamente cuando el snapshot vivo no trae datos. Esto evita que el
+    workflow self-hosted publique datos viejos cuando la sesión local se rompió.
     """
     profile = config["profile"]
     linkedin_config = config.get("linkedin", {})
     url = linkedin_config.get("url") or profile["links"]["linkedin"]
     limit = int(linkedin_config.get("sectionItemLimit", 4))
+    snapshot_only = env_truthy("LINKEDIN_SNAPSHOT_ONLY")
 
     attempts: list[str] = []
 
-    file_payload = load_json_file(os.environ.get("LINKEDIN_PROFILE_JSON_FILE"))
+    json_file = os.environ.get("LINKEDIN_PROFILE_JSON_FILE")
+    file_payload = load_json_file(json_file)
     if file_payload:
         normalized = normalize_linkedin_payload(file_payload, source="LINKEDIN_PROFILE_JSON_FILE", url=url, limit=limit)
         if normalized["available"]:
             return normalized
         attempts.append(f"browser_snapshot: {file_payload.get('reason') or normalized.get('reason')}")
+    elif snapshot_only and json_file:
+        attempts.append(f"browser_snapshot: no se pudo leer {json_file}")
+
+    if snapshot_only:
+        return {
+            "available": False,
+            "source": "snapshot_unavailable",
+            "url": url,
+            "headline": "",
+            "summary": "",
+            "sections": {},
+            "reason": "; ".join(attempts[:3]) or "snapshot requerido sin datos",
+        }
 
     cookie = os.environ.get("LINKEDIN_COOKIE")
     if cookie:
@@ -972,7 +996,7 @@ def fetch_linkedin(config: dict[str, Any]) -> dict[str, Any]:
             if parsed.get("available"):
                 return parsed
             attempts.append(str(parsed.get("reason") or "voyager sin datos extraíbles"))
-        except (FetchError, json.JSONDecodeError, TypeError) as exc:
+        except (FetchError, json.JSONDecodeError, TypeError, TimeoutError, OSError, urllib.error.URLError) as exc:
             attempts.append(f"voyager_api: {exc}")
         try:
             raw_html = request_text(url, headers={"Cookie": cookie}, retries=1)
@@ -980,7 +1004,7 @@ def fetch_linkedin(config: dict[str, Any]) -> dict[str, Any]:
             if parsed.get("available"):
                 return parsed
             attempts.append(str(parsed.get("reason") or "cookie sin datos extraíbles"))
-        except FetchError as exc:
+        except (FetchError, TimeoutError, OSError, urllib.error.URLError) as exc:
             attempts.append(str(exc))
     else:
         attempts.append("LINKEDIN_COOKIE no configurado")

@@ -32,17 +32,14 @@ jobs:
           node --version
           npm --version
 
-      - name: Verificar secreto de LinkedIn
+      - name: Verificar sesión local de LinkedIn
         shell: pwsh
-        env:
-          LINKEDIN_COOKIE: ${{ secrets.LINKEDIN_COOKIE }}
         run: |
-          if ([string]::IsNullOrWhiteSpace($env:LINKEDIN_COOKIE)) {
-            throw "LINKEDIN_COOKIE no está configurado como secret del repositorio."
+          $profileDir = Join-Path $env:LOCALAPPDATA 'h0w4r-linkedin-sync\browser-profile'
+          if (!(Test-Path $profileDir)) {
+            throw "No existe la sesión local de LinkedIn en $profileDir. Ejecuta scripts/bootstrap_linkedin_session.ps1 en el host del runner."
           }
-          $hasLiAt = $env:LINKEDIN_COOKIE -match '(^|;\s*)li_at='
-          $hasJsession = $env:LINKEDIN_COOKIE -match '(^|;\s*)JSESSIONID='
-          Write-Host "Cookie LinkedIn presente. li_at=$hasLiAt JSESSIONID=$hasJsession"
+          Write-Host "Sesión local LinkedIn detectada en $profileDir"
 
       - name: Instalar cliente Playwright sin descargar navegador
         shell: pwsh
@@ -53,13 +50,14 @@ jobs:
           # hace el sync lento y puede dejar jobs colgados por red; usamos Chrome local.
           npm install --no-save --ignore-scripts playwright@1.56.1
 
-      - name: Extraer snapshot LinkedIn desde runner local
+      - name: Extraer snapshot LinkedIn desde sesión local
         shell: pwsh
         env:
-          LINKEDIN_COOKIE: ${{ secrets.LINKEDIN_COOKIE }}
           LINKEDIN_PROFILE_URL: "https://www.linkedin.com/in/cehp94/"
           PLAYWRIGHT_CHROMIUM_CHANNEL: "chrome"
+          LINKEDIN_HEADLESS: "true"
         run: |
+          $env:LINKEDIN_USER_DATA_DIR = Join-Path $env:LOCALAPPDATA 'h0w4r-linkedin-sync\browser-profile'
           node scripts/fetch_linkedin_profile.mjs > .linkedin-profile.json
           if (!(Test-Path .linkedin-profile.json)) {
             throw "No se generó .linkedin-profile.json"
@@ -68,24 +66,24 @@ jobs:
       - name: Diagnosticar LinkedIn vivo sin respaldo
         shell: pwsh
         env:
-          LINKEDIN_COOKIE: ${{ secrets.LINKEDIN_COOKIE }}
           LINKEDIN_PROFILE_JSON_FILE: .linkedin-profile.json
+          LINKEDIN_SNAPSHOT_ONLY: "1"
         run: python scripts/build_profile.py --linkedin-diagnostics --require-linkedin-when-configured
 
       - name: Generar README desde GitHub, Gravatar y LinkedIn vivo
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          LINKEDIN_COOKIE: ${{ secrets.LINKEDIN_COOKIE }}
           LINKEDIN_PROFILE_JSON_FILE: .linkedin-profile.json
+          LINKEDIN_SNAPSHOT_ONLY: "1"
         run: python scripts/build_profile.py --write
 
       - name: Validar README generado
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          LINKEDIN_COOKIE: ${{ secrets.LINKEDIN_COOKIE }}
           LINKEDIN_PROFILE_JSON_FILE: .linkedin-profile.json
+          LINKEDIN_SNAPSHOT_ONLY: "1"
         run: python scripts/build_profile.py --check
 
       - name: Commit de cambios automáticos

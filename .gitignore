@@ -21,5 +21,7 @@ Thumbs.db
 node_modules/
 package-lock.json
 .linkedin-cookie.txt
+.linkedin-storage-state.json
+.linkedin-user-data/
 .linkedin-profile.live.json
 .linkedin-profile.normalized.json
