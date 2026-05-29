@@ -9,6 +9,11 @@
 - Mantener el perfil bilingüe ES/EN, pero priorizar naturalidad y marca personal sobre literalidad mecánica.
 - Puede tener personalidad ligera y humor técnico sutil; no debe sonar seco, corporativo o robótico.
 
+
+## Prueba de voz obligatoria
+
+Antes de aceptar cualquier texto visible del README, aplicar esta pregunta: "¿Chris escribiría esto así a alguien que acaba de entrar a su perfil?". Si la respuesta es no, el texto debe reescribirse o moverse a documentación interna. El README no conversa con Chris ni explica la automatización; presenta a Chris ante el mundo.
+
 ## Contenido permitido en el README
 
 - Presentación profesional general.

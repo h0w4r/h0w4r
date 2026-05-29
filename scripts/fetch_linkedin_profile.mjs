@@ -58,11 +58,34 @@ if (!cookieHeader) {
   process.exit(0);
 }
 
-const browser = await chromium.launch({
-  channel: process.env.PLAYWRIGHT_CHROMIUM_CHANNEL || 'chrome',
-  headless: true,
-  args: ['--no-sandbox', '--disable-dev-shm-usage'],
-});
+async function launchChromium() {
+  // En runners públicos usamos Chrome del sistema; en self-hosted puede convenir
+  // el Chromium administrado por Playwright. Probamos ambos para no dejar el
+  // sync vivo atado a una única instalación de navegador.
+  const requestedChannel = process.env.PLAYWRIGHT_CHROMIUM_CHANNEL || 'chrome';
+  const attempts = [];
+  if (!['', 'bundled', 'chromium', 'none'].includes(requestedChannel.toLowerCase())) {
+    attempts.push({ channel: requestedChannel });
+  }
+  attempts.push({});
+
+  const errors = [];
+  for (const attempt of attempts) {
+    try {
+      return await chromium.launch({
+        ...attempt,
+        headless: true,
+        args: ['--no-sandbox', '--disable-dev-shm-usage'],
+      });
+    } catch (error) {
+      const label = attempt.channel ? `channel=${attempt.channel}` : 'bundled-chromium';
+      errors.push(`${label}: ${safeError(error)}`);
+    }
+  }
+  throw new Error(`No se pudo iniciar Chromium: ${errors.join(' | ')}`);
+}
+
+const browser = await launchChromium();
 try {
   const context = await browser.newContext({
     locale: 'es-PE',

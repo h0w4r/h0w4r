@@ -1,0 +1,105 @@
+name: Actualizar perfil vivo con LinkedIn local
+
+on:
+  schedule:
+    # 06:22 Lima / 11:22 UTC. Runner propio para evitar bloqueos del runner público.
+    - cron: "22 11 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: perfil-vivo-linkedin-local-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-profile:
+    name: Regenerar README con LinkedIn vivo
+    runs-on: [self-hosted, windows, linkedin-sync]
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Preparar Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - name: Preparar Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Verificar secreto de LinkedIn
+        shell: pwsh
+        env:
+          LINKEDIN_COOKIE: ${{ secrets.LINKEDIN_COOKIE }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:LINKEDIN_COOKIE)) {
+            throw "LINKEDIN_COOKIE no está configurado como secret del repositorio."
+          }
+          $hasLiAt = $env:LINKEDIN_COOKIE -match '(^|;\s*)li_at='
+          $hasJsession = $env:LINKEDIN_COOKIE -match '(^|;\s*)JSESSIONID='
+          Write-Host "Cookie LinkedIn presente. li_at=$hasLiAt JSESSIONID=$hasJsession"
+
+      - name: Instalar Playwright para snapshot local
+        shell: pwsh
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install chromium
+
+      - name: Extraer snapshot LinkedIn desde runner local
+        shell: pwsh
+        env:
+          LINKEDIN_COOKIE: ${{ secrets.LINKEDIN_COOKIE }}
+          LINKEDIN_PROFILE_URL: "https://www.linkedin.com/in/cehp94/"
+          PLAYWRIGHT_CHROMIUM_CHANNEL: "chromium"
+        run: |
+          node scripts/fetch_linkedin_profile.mjs > .linkedin-profile.json
+          if (!(Test-Path .linkedin-profile.json)) {
+            throw "No se generó .linkedin-profile.json"
+          }
+
+      - name: Diagnosticar LinkedIn vivo sin respaldo
+        shell: pwsh
+        env:
+          LINKEDIN_COOKIE: ${{ secrets.LINKEDIN_COOKIE }}
+          LINKEDIN_PROFILE_JSON_FILE: .linkedin-profile.json
+        run: python scripts/build_profile.py --linkedin-diagnostics --require-linkedin-when-configured
+
+      - name: Generar README desde GitHub, Gravatar y LinkedIn vivo
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LINKEDIN_COOKIE: ${{ secrets.LINKEDIN_COOKIE }}
+          LINKEDIN_PROFILE_JSON_FILE: .linkedin-profile.json
+        run: python scripts/build_profile.py --write
+
+      - name: Validar README generado
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LINKEDIN_COOKIE: ${{ secrets.LINKEDIN_COOKIE }}
+          LINKEDIN_PROFILE_JSON_FILE: .linkedin-profile.json
+        run: python scripts/build_profile.py --check
+
+      - name: Commit de cambios automáticos
+        shell: pwsh
+        run: |
+          $changes = git status --porcelain README.md
+          if ([string]::IsNullOrWhiteSpace($changes)) {
+            Write-Host "README.md ya está actualizado; no hay commit nuevo."
+            exit 0
+          }
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "chore: actualiza perfil vivo desde LinkedIn"
+          git pull --rebase origin main
+          git push

@@ -1,9 +1,7 @@
 name: Actualizar perfil vivo
 
 on:
-  schedule:
-    # GitHub usa UTC; una ejecución diaria evita ruido y mantiene vivo el README.
-    - cron: "17 11 * * *"
+  # Manual/fallback: el cron diario con LinkedIn vivo corre en update-profile-self-hosted.yml.
   workflow_dispatch:
   push:
     branches:

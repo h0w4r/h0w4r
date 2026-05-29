@@ -18,3 +18,8 @@ venv/
 Thumbs.db
 .vscode/
 .idea/
+node_modules/
+package-lock.json
+.linkedin-cookie.txt
+.linkedin-profile.live.json
+.linkedin-profile.normalized.json
