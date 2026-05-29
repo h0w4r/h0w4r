@@ -31,6 +31,24 @@ Referencias útiles:
 - [GitHub - usar runners self-hosted en workflows](https://docs.github.com/en/actions/how-tos/managing-self-hosted-runners/using-self-hosted-runners-in-a-workflow)
 - [GitHub - labels para runners self-hosted](https://docs.github.com/en/actions/how-tos/managing-self-hosted-runners/using-labels-with-self-hosted-runners)
 
+## Instalación rápida desde este repo
+
+Desde una consola autenticada con `gh`, se puede preparar el runner local con:
+
+```powershell
+.\scripts\install_github_runner.ps1 -StartNow
+```
+
+El instalador:
+
+1. Descarga la última release oficial de `actions/runner` para Windows x64.
+2. Registra el runner contra `h0w4r/h0w4r` usando un token efímero obtenido con `gh api`.
+3. Asigna la etiqueta `linkedin-sync`.
+4. Lo deja bajo `.local/actions-runner/`, ignorado por git.
+5. Opcionalmente lo arranca en segundo plano con `-StartNow`.
+
+Esto desbloquea el workflow diario sin pegar tokens en archivos ni en commits. Para dejarlo resistente a reinicios, después conviene instalarlo como servicio con `svc.cmd` desde PowerShell administrador.
+
 ## Configuración del runner self-hosted
 
 En GitHub:
