@@ -856,7 +856,14 @@ def normalize_linkedin_payload(payload: dict[str, Any], *, source: str, url: str
         if key == "publications" and not any(LINKEDIN_PUBLICATION_SIGNALS.search(value) for value in values):
             values = []
         sections[key] = values
-    raw_text = payload.get("rawText") or payload.get("raw_text") or ""
+    raw_text = "\n".join(
+        str(part)
+        for part in (
+            payload.get("rawText") or payload.get("raw_text") or "",
+            payload.get("detailsRawText") or payload.get("details_raw_text") or "",
+        )
+        if part
+    )
     activity_text = payload.get("activityRawText") or payload.get("activity_raw_text") or ""
     if raw_text:
         lines = [compact_text(line, max_len=260) for line in str(raw_text).splitlines()]

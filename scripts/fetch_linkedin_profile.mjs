@@ -84,7 +84,6 @@ try {
     profileUrl,
     profileUrl.replace(/\/$/, ''),
     slug ? `https://www.linkedin.com/in/${slug}/?originalSubdomain=pe` : '',
-    slug ? `https://www.linkedin.com/in/${slug}/details/experience/` : '',
     slug ? `https://www.linkedin.com/mwlite/in/${slug}` : '',
   ].filter(Boolean);
 
@@ -143,15 +142,36 @@ try {
     };
   });
 
+  const safeInnerText = async () =>
+    page
+      .locator('body')
+      .innerText({ timeout: 5000 })
+      .then((text) => text || '')
+      .catch(() => '');
+
+  const detailPaths = ['education', 'certifications', 'projects', 'courses'];
+  const detailChunks = [];
+  for (const detailPath of detailPaths) {
+    const detailUrl = profileUrl.replace(/\/?$/, `/details/${detailPath}/`);
+    try {
+      await page.goto(detailUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
+      await page.waitForTimeout(3500);
+      const text = await safeInnerText();
+      if (text && !/join linkedin|sign in|inicia sesión|authwall/i.test(text)) {
+        detailChunks.push(`\n\n[linkedin:${detailPath}]\n${text.slice(0, 40000)}`);
+      }
+    } catch {
+      // Se ignora el fallo puntual; el diagnóstico agregado se imprime abajo.
+    }
+  }
+  snapshot.detailsRawText = detailChunks.join('\n').slice(0, 120000);
+
   const activityUrl = profileUrl.replace(/\/?$/, '/recent-activity/all/');
   try {
     await page.goto(activityUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
     await page.waitForTimeout(5000);
-    snapshot.activityRawText = await page
-      .locator('body')
-      .innerText({ timeout: 5000 })
-      .then((text) => text.slice(0, 60000))
-      .catch(() => '');
+    const text = await safeInnerText();
+    snapshot.activityRawText = /join linkedin|sign in|inicia sesión|authwall/i.test(text) ? '' : text.slice(0, 60000);
   } catch {
     snapshot.activityRawText = '';
   }
@@ -162,9 +182,10 @@ try {
   snapshot.summary = compact(snapshot.summary, 600);
   snapshot.metaDescription = compact(snapshot.metaDescription, 600);
   const lineCount = String(snapshot.rawText || '').split('\n').filter(Boolean).length;
+  const detailLineCount = String(snapshot.detailsRawText || '').split('\n').filter(Boolean).length;
   const activityLineCount = String(snapshot.activityRawText || '').split('\n').filter(Boolean).length;
   console.error(
-    `LinkedIn browser snapshot: available. profile_lines=${lineCount} activity_lines=${activityLineCount} url=${snapshot.url}`,
+    `LinkedIn browser snapshot: available. profile_lines=${lineCount} detail_lines=${detailLineCount} activity_lines=${activityLineCount} url=${snapshot.url}`,
   );
   console.log(JSON.stringify(snapshot));
 } finally {
