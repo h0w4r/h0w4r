@@ -25,15 +25,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Preparar Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.x"
-
-      - name: Preparar Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: "24"
+      - name: Verificar runtimes locales
+        shell: pwsh
+        run: |
+          python --version
+          node --version
+          npm --version
 
       - name: Verificar secreto de LinkedIn
         shell: pwsh
@@ -47,18 +44,21 @@ jobs:
           $hasJsession = $env:LINKEDIN_COOKIE -match '(^|;\s*)JSESSIONID='
           Write-Host "Cookie LinkedIn presente. li_at=$hasLiAt JSESSIONID=$hasJsession"
 
-      - name: Instalar Playwright para snapshot local
+      - name: Instalar cliente Playwright sin descargar navegador
         shell: pwsh
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
         run: |
-          npm install --no-save playwright@1.56.1
-          npx playwright install chromium
+          # El runner Windows ya tiene Chrome/Edge. Descargar Chromium en cada run
+          # hace el sync lento y puede dejar jobs colgados por red; usamos Chrome local.
+          npm install --no-save --ignore-scripts playwright@1.56.1
 
       - name: Extraer snapshot LinkedIn desde runner local
         shell: pwsh
         env:
           LINKEDIN_COOKIE: ${{ secrets.LINKEDIN_COOKIE }}
           LINKEDIN_PROFILE_URL: "https://www.linkedin.com/in/cehp94/"
-          PLAYWRIGHT_CHROMIUM_CHANNEL: "chromium"
+          PLAYWRIGHT_CHROMIUM_CHANNEL: "chrome"
         run: |
           node scripts/fetch_linkedin_profile.mjs > .linkedin-profile.json
           if (!(Test-Path .linkedin-profile.json)) {

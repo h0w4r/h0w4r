@@ -44,15 +44,15 @@ $hasJsession = $cookie -match '(^|;\s*)JSESSIONID='
 Write-Step "Cookie detectada: li_at=$hasLiAt JSESSIONID=$hasJsession"
 
 if (-not $SkipPlaywrightInstall) {
-  Write-Step "Instalando/actualizando Playwright local"
-  npm install --no-save playwright@1.56.1
-  npx playwright install chromium
+  Write-Step "Instalando/actualizando cliente Playwright local sin descargar navegador"
+  $env:PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1"
+  npm install --no-save --ignore-scripts playwright@1.56.1
 }
 
 Write-Step "Extrayendo snapshot LinkedIn vivo"
 $env:LINKEDIN_COOKIE = $cookie
 $env:LINKEDIN_PROFILE_URL = "https://www.linkedin.com/in/cehp94/"
-$env:PLAYWRIGHT_CHROMIUM_CHANNEL = "chromium"
+$env:PLAYWRIGHT_CHROMIUM_CHANNEL = "chrome"
 node scripts/fetch_linkedin_profile.mjs > .linkedin-profile.json
 
 if (-not (Test-Path ".linkedin-profile.json")) {

@@ -113,7 +113,7 @@ Para regenerar `README.md` localmente durante una prueba:
 El workflow self-hosted corre todos los días a las **06:22 de Lima** (`11:22 UTC`). Pasos principales:
 
 1. Valida que `LINKEDIN_COOKIE` exista.
-2. Instala Playwright/Chromium si hace falta.
+2. Instala solo el cliente Playwright y usa Chrome local del runner.
 3. Extrae `.linkedin-profile.json` con sesión autenticada.
 4. Ejecuta diagnóstico sin fallback.
 5. Genera y valida `README.md`.
