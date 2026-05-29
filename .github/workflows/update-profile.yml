@@ -3,16 +3,6 @@ name: Actualizar perfil vivo
 on:
   # Manual/fallback: el cron diario con LinkedIn vivo corre en update-profile-self-hosted.yml.
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - "scripts/build_profile.py"
-      - "scripts/fetch_linkedin_profile.mjs"
-      - ".github/linkedin.profile.example.json"
-      - ".github/profile.config.json"
-      - ".github/workflows/update-profile.yml"
-      - "AGENTS.md"
 
 permissions:
   contents: write
