@@ -6,10 +6,12 @@
     "gravatarSlug": "ckirsch94",
     "company": "NTTDATA",
     "location": "Lima, Perú",
+    "timezone": "America/Lima",
+    "timezoneLabel": "Lima, Perú",
     "headlineEs": "Software Engineer · IBM i/AS400 · Spring Boot · tooling IA/Codex · open source",
     "headlineEn": "Software Engineer · IBM i/AS400 · Spring Boot · AI/Codex tooling · open source",
-    "bioEs": "Construyo herramientas para que entornos legacy, plataformas modernas y agentes de IA trabajen juntos sin drama innecesario.",
-    "bioEn": "I build tools that help legacy systems, modern platforms and AI agents work together without unnecessary drama.",
+    "bioEs": "Hola, soy Chris. Construyo herramientas open source alrededor de IBM i/AS400, backends Java/Spring Boot y automatización con IA para desarrollo real.",
+    "bioEn": "Hi, I am Chris. I build open-source tools around IBM i/AS400, Java/Spring Boot backends and AI-assisted automation for real development workflows.",
     "links": {
       "linkedin": "https://www.linkedin.com/in/cehp94/",
       "gravatar": "https://gravatar.com/ckirsch94",
@@ -108,6 +110,7 @@
   "activity": {
     "recentRepoLimit": 7,
     "recentEventLimit": 6,
-    "languageRepoLimit": 20
+    "languageRepoLimit": 20,
+    "followersMinDisplay": 100
   }
 }

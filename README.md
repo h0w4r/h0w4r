@@ -1,24 +1,24 @@
 <!-- Perfil generado automáticamente por scripts/build_profile.py. -->
-<!-- Fuente viva: GitHub API + Gravatar API. Edita .github/profile.config.json para cambios manuales. -->
+<!-- Fuente viva: APIs públicas de GitHub y perfil visual externo. Edita .github/profile.config.json para cambios manuales. -->
 
-<img align="right" width="130" src="https://1.gravatar.com/avatar/27a55a433ec79b38e1a4bfed26d22164e9285be10557dc70b8930d4582110250?s=260" alt="Avatar de Chris Kirsch" />
+<a href="https://gravatar.com/ckirsch94"><img align="right" width="130" src="https://1.gravatar.com/avatar/27a55a433ec79b38e1a4bfed26d22164e9285be10557dc70b8930d4582110250?s=260" alt="Chris Kirsch" /></a>
 
-# Chris Kirsch · h0w4r
+### Chris Kirsch · h0w4r
 
 **Software Engineer · IBM i/AS400 · Spring Boot · tooling IA/Codex · open source**  
 <sub>**Software Engineer · IBM i/AS400 · Spring Boot · AI/Codex tooling · open source**</sub>
 
 ![repos: 14](https://img.shields.io/badge/repos-14-2563eb?style=for-the-badge)
-![followers: 2](https://img.shields.io/badge/followers-2-7c3aed?style=for-the-badge)
 ![location: Lima, Perú](https://img.shields.io/badge/location-Lima%2C%20Per%C3%BA-059669?style=for-the-badge)
-![updated: 2026-05-29 UTC](https://img.shields.io/badge/updated-2026--05--29%20UTC-334155?style=for-the-badge)
+![updated: 2026-05-28 23:03 Lima, Perú (UTC-05:00)](https://img.shields.io/badge/updated-2026--05--28%2023%3A03%20Lima%2C%20Per%C3%BA%20%28UTC--05%3A00%29-334155?style=for-the-badge)
 
-Construyo herramientas para que entornos legacy, plataformas modernas y agentes de IA trabajen juntos sin drama innecesario.  
-<sub>I build tools that help legacy systems, modern platforms and AI agents work together without unnecessary drama.</sub>
+Hola, soy Chris. Construyo herramientas open source alrededor de IBM i/AS400, backends Java/Spring Boot y automatización con IA para desarrollo real.<br/>
+<sub>Hi, I am Chris. I build open-source tools around IBM i/AS400, Java/Spring Boot backends and AI-assisted automation for real development workflows.</sub>
 
-> Perfil vivo para reclutadores, equipos técnicos y devs open source. Si algo cambió en mi GitHub o Gravatar, este README debería enterarse antes que yo tenga que pelearme con Markdown a mano.
->
-> Live profile for recruiters, technical teams and open-source developers. If my GitHub or Gravatar changes, this README should notice before I manually wrestle with Markdown.
+Me gusta crear software que sea útil, verificable y fácil de mantener; especialmente cuando conecta mundos que normalmente no conversan bien entre sí: IBM i/AS400, backends modernos y agentes de IA.<br/>
+<sub>I like building useful, verifiable and maintainable software, especially when it connects worlds that usually do not talk nicely to each other: IBM i/AS400, modern backends and AI agents.</sub>
+
+<br clear="right" />
 
 ---
 
@@ -70,7 +70,7 @@ Construyo herramientas para que entornos legacy, plataformas modernas y agentes 
 
 ## Actividad reciente / Recent activity
 
-**Resumen del año / Year snapshot:** 153 contribuciones en 2026 (45 commits públicos, 1 PR, 0 issues, 0 reviews, 102 contribuciones privadas/restringidas).
+**Resumen del año / Year snapshot:** 153 contribuciones en 2026 (144 commits públicos, 1 PR, 0 issues, 0 reviews, 0 contribuciones privadas/restringidas).
 
 ### Repositorios activos / Active repositories
 
@@ -95,12 +95,12 @@ Construyo herramientas para que entornos legacy, plataformas modernas y agentes 
 
 ---
 
-## Para reclutadores y colaboradores / For recruiters and collaborators
+## Cómo puedo aportar / How I can help
 
-- **Dónde aporto más valor:** modernización IBM i/AS400, tooling para desarrolladores, automatización con IA, backends Java/Spring y validación técnica reproducible.
-- **Where I add the most value:** IBM i/AS400 modernization, developer tooling, AI-assisted automation, Java/Spring backends and reproducible technical validation.
-- **Cómo trabajo:** prefiero software verificable, documentación clara, commits pequeños y herramientas que reduzcan fricción real — no teatro de productividad con fuegos artificiales.
-- **How I work:** I prefer verifiable software, clear documentation, small commits and tools that reduce real friction — not productivity theater with fireworks.
+- **Dónde suelo aportar más valor:** modernización IBM i/AS400, tooling para desarrolladores, automatización con IA, backends Java/Spring y validación técnica reproducible.
+- **Where I usually add the most value:** IBM i/AS400 modernization, developer tooling, AI-assisted automation, Java/Spring backends and reproducible technical validation.
+- **Cómo trabajo:** me gustan los commits pequeños, la documentación clara, las pruebas que demuestran algo y las herramientas que eliminan fricción real.
+- **How I work:** I like small commits, clear documentation, tests that actually prove something and tools that remove real friction.
 
 ## Contacto / Contact
 
@@ -120,4 +120,4 @@ Construyo herramientas para que entornos legacy, plataformas modernas y agentes 
 
 ---
 
-<sub>Última actualización automática: 2026-05-29 UTC. Perfil Gravatar: `Software Engineer` en `NTTDATA` · https://gravatar.com/ckirsch94</sub>
+<sub>Última actualización automática: 2026-05-28 23:03 Lima, Perú (UTC-05:00). Rol público: `Software Engineer` en `NTTDATA`.</sub>

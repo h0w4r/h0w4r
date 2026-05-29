@@ -22,6 +22,7 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / ".github" / "profile.config.json"
@@ -250,6 +251,30 @@ def badge(label: str, message: str, color: str = "0f172a") -> str:
     return f"![{label}: {message}](https://img.shields.io/badge/{safe_label}-{safe_message}-{color}?style=for-the-badge)"
 
 
+def with_query_params(url: str, **params: str) -> str:
+    """Agrega o reemplaza parámetros de query sin romper URLs que ya tenían query string."""
+    parsed = urllib.parse.urlparse(url)
+    query = dict(urllib.parse.parse_qsl(parsed.query, keep_blank_values=True))
+    query.update(params)
+    return urllib.parse.urlunparse(parsed._replace(query=urllib.parse.urlencode(query)))
+
+
+def local_timestamp(profile: dict[str, Any]) -> str:
+    """Devuelve la hora de actualización en la zona horaria pública del perfil."""
+    timezone_name = profile.get("timezone", "UTC")
+    timezone_label = profile.get("timezoneLabel", timezone_name)
+    try:
+        now = datetime.now(ZoneInfo(timezone_name))
+    except ZoneInfoNotFoundError:
+        # Fallback explícito: el README sigue generándose aunque el runner no conozca la zona.
+        now = datetime.now(timezone.utc)
+        timezone_label = "UTC"
+
+    offset = now.strftime("%z")
+    offset_text = f"UTC{offset[:3]}:{offset[3:]}" if offset else "UTC"
+    return f"{now:%Y-%m-%d %H:%M} {timezone_label} ({offset_text})"
+
+
 def repo_url(username: str, repo_name: str) -> str:
     """Construye la URL pública del repositorio."""
     return f"https://github.com/{username}/{repo_name}"
@@ -360,26 +385,27 @@ def render_readme(config: dict[str, Any], data: dict[str, Any]) -> str:
     repos = data["repos"]
     languages = data["languages"]
     repos_by_name = repo_map(repos)
-    generated_date = datetime.now(timezone.utc).strftime("%Y-%m-%d UTC")
+    generated_date = local_timestamp(profile)
 
     avatar_url = gravatar.get("avatar_url") or github_user.get("avatar_url") or "https://avatars.githubusercontent.com/u/33362684?v=4"
-    avatar_url = f"{avatar_url}?s=260"
-    gravatar_name = gravatar.get("display_name") or profile["displayName"]
+    avatar_url = with_query_params(avatar_url, s="260")
     gravatar_role = gravatar.get("job_title") or "Software Engineer"
     public_repos = github_user.get("public_repos", len(repos))
-    followers = github_user.get("followers", 0)
+    followers = int(github_user.get("followers", 0) or 0)
+    followers_min = int(config.get("activity", {}).get("followersMinDisplay", 100))
     lang_list = top_languages(repos, languages)
     lang_text = ", ".join(lang for lang, _ in lang_list) if lang_list else "Java, Python, PowerShell, C"
 
     stack_badges = "\n".join(badge("stack", item, "1f2937") for item in config["stackBadges"])
-    signal_badges = "\n".join(
-        [
-            badge("repos", str(public_repos), "2563eb"),
-            badge("followers", str(followers), "7c3aed"),
-            badge("location", profile["location"], "059669"),
-            badge("updated", generated_date, "334155"),
-        ]
-    )
+    signal_badges_items = [
+        badge("repos", str(public_repos), "2563eb"),
+        badge("location", profile["location"], "059669"),
+        badge("updated", generated_date, "334155"),
+    ]
+    # La audiencia pública no necesita ver una métrica social pequeña; se muestra solo cuando ya aporta señal.
+    if followers >= followers_min:
+        signal_badges_items.insert(1, badge("followers", str(followers), "7c3aed"))
+    signal_badges = "\n".join(signal_badges_items)
 
     focus_lines = []
     for area in config["focusAreas"]:
@@ -408,23 +434,24 @@ def render_readme(config: dict[str, Any], data: dict[str, Any]) -> str:
 
     markdown = f"""
 <!-- Perfil generado automáticamente por scripts/build_profile.py. -->
-<!-- Fuente viva: GitHub API + Gravatar API. Edita .github/profile.config.json para cambios manuales. -->
+<!-- Fuente viva: APIs públicas de GitHub y perfil visual externo. Edita .github/profile.config.json para cambios manuales. -->
 
-<img align="right" width="130" src="{avatar_url}" alt="Avatar de {md_escape(gravatar_name)}" />
+<a href="{links['gravatar']}"><img align="right" width="130" src="{avatar_url}" alt="Chris Kirsch" /></a>
 
-# Chris Kirsch · h0w4r
+### Chris Kirsch · h0w4r
 
 **{profile['headlineEs']}**  
 <sub>**{profile['headlineEn']}**</sub>
 
 {signal_badges}
 
-{profile['bioEs']}  
+{profile['bioEs']}<br/>
 <sub>{profile['bioEn']}</sub>
 
-> Perfil vivo para reclutadores, equipos técnicos y devs open source. Si algo cambió en mi GitHub o Gravatar, este README debería enterarse antes que yo tenga que pelearme con Markdown a mano.
->
-> Live profile for recruiters, technical teams and open-source developers. If my GitHub or Gravatar changes, this README should notice before I manually wrestle with Markdown.
+Me gusta crear software que sea útil, verificable y fácil de mantener; especialmente cuando conecta mundos que normalmente no conversan bien entre sí: IBM i/AS400, backends modernos y agentes de IA.<br/>
+<sub>I like building useful, verifiable and maintainable software, especially when it connects worlds that usually do not talk nicely to each other: IBM i/AS400, modern backends and AI agents.</sub>
+
+<br clear="right" />
 
 ---
 
@@ -460,12 +487,12 @@ def render_readme(config: dict[str, Any], data: dict[str, Any]) -> str:
 
 ---
 
-## Para reclutadores y colaboradores / For recruiters and collaborators
+## Cómo puedo aportar / How I can help
 
-- **Dónde aporto más valor:** modernización IBM i/AS400, tooling para desarrolladores, automatización con IA, backends Java/Spring y validación técnica reproducible.
-- **Where I add the most value:** IBM i/AS400 modernization, developer tooling, AI-assisted automation, Java/Spring backends and reproducible technical validation.
-- **Cómo trabajo:** prefiero software verificable, documentación clara, commits pequeños y herramientas que reduzcan fricción real — no teatro de productividad con fuegos artificiales.
-- **How I work:** I prefer verifiable software, clear documentation, small commits and tools that reduce real friction — not productivity theater with fireworks.
+- **Dónde suelo aportar más valor:** modernización IBM i/AS400, tooling para desarrolladores, automatización con IA, backends Java/Spring y validación técnica reproducible.
+- **Where I usually add the most value:** IBM i/AS400 modernization, developer tooling, AI-assisted automation, Java/Spring backends and reproducible technical validation.
+- **Cómo trabajo:** me gustan los commits pequeños, la documentación clara, las pruebas que demuestran algo y las herramientas que eliminan fricción real.
+- **How I work:** I like small commits, clear documentation, tests that actually prove something and tools that remove real friction.
 
 ## Contacto / Contact
 
@@ -480,7 +507,7 @@ def render_readme(config: dict[str, Any], data: dict[str, Any]) -> str:
 
 ---
 
-<sub>Última actualización automática: {generated_date}. Perfil Gravatar: `{md_escape(gravatar_role)}` en `{md_escape(gravatar.get('company') or profile['company'])}` · {md_escape(gravatar.get('profile_url') or links['gravatar'])}</sub>
+<sub>Última actualización automática: {generated_date}. Rol público: `{md_escape(gravatar_role)}` en `{md_escape(gravatar.get('company') or profile['company'])}`.</sub>
 """.strip() + "\n"
     return textwrap.dedent(markdown)
 
